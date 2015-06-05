@@ -1,0 +1,22 @@
+{% load static %}
+<html>
+    <head>
+        <title>Hello React</title>
+        <link rel="stylesheet" href="{% static 'normalize.css' %}">
+        <link rel="stylesheet" href="{% static 'skeleton.css' %}">
+        <style>
+            @media (min-width: 550px) {
+                .container  { max-width: 1400px; }
+            }
+        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+        <h1>Hello, React!</h1>
+        <div class="container"><div id="content"></div></div>
+    </body>
+    <script src="//fb.me/react-0.13.3.js"></script>
+    <script src="//fb.me/JSXTransformer-0.13.3.js"></script>
+    <script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script type="text/jsx" src="{% static 'main.js' %}"></script>
+</html>

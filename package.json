@@ -1,0 +1,27 @@
+{
+  "name": "react-tutorial",
+  "version": "1.0.0",
+  "description": "A react tutorial",
+  "main": "",
+  "dependencies": {
+    "flux": "^2.0.3",
+    "jquery": "^2.1.4",
+    "react": "^0.13.3",
+    "reactify": "^1.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "watch": "watchify  static/main.js -t reactify -o static/bundle.js",
+    "build": "browserify static/main.js -t reactify  | uglifyjs -mc warnings=false > static/bundle.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/spapas/react-tutorial"
+  },
+  "author": "",
+  "license": "unlicense",
+  "bugs": {
+    "url": "https://github.com/spapas/react-tutorial/issues"
+  },
+  "homepage": "https://github.com/spapas/react-tutorial"
+}

@@ -2,24 +2,6 @@ var React = require('react');
 var BookStore = require('./stores').BookStore;
 var BookActions = require('./actions').BookActions;
 
-var SearchPanel = React.createClass({
-    render: function() {
-        return (
-            <div className="row">
-                <div className="one-fourth column">
-                    Filter: &nbsp;
-                    <input ref='search' type='text' value={this.props.search} onChange={this.onSearchChanged} />
-                    {this.props.search?<button onClick={this.props.onClearSearch} >x</button>:null}
-                </div>
-            </div>
-        )
-    },
-    onSearchChanged: function() {
-        var query = React.findDOMNode(this.refs.search).value;
-        this.props.onSearchChanged(query);
-    }
-});
-
 var BookTableRow = React.createClass({
     render: function() {
         return (
@@ -40,7 +22,6 @@ var BookTableRow = React.createClass({
 var BookTable = React.createClass({
     render: function() {
         var rows = [];
-        var self=this;
         this.props.books.forEach(function(book) {
             rows.push(<BookTableRow key={book.id} book={book} />);
         });
@@ -132,7 +113,7 @@ var SearchPanel = React.createClass({
         )
     },
     onSearchChange: function() {
-        var query = React.findDOMNode(this.refs.search).value.trim();
+        var query = React.findDOMNode(this.refs.search).value;
         if (this.promise) {
             clearInterval(this.promise)
         }

@@ -1,7 +1,7 @@
 var React = require('react');
-var components = require('./components');
-var stores = require('./stores');
+var BookPanel = require('./components/BookPanel.react').BookPanel;
+var reloadBooks = require('./stores/BookStore').reloadBooks;
 
-React.render(<components.BookPanel url='/api/books/' />, document.getElementById('content'));
+React.render(<BookPanel url='/api/books/' />, document.getElementById('content'));
 
-stores.reloadBooks();
+reloadBooks();

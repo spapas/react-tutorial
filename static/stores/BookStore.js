@@ -1,7 +1,7 @@
 var $ = require('jquery');
 var EventEmitter = require('events').EventEmitter;
-var AppDispatcher = require('./actions').AppDispatcher;
-var BookConstants = require('./constants')
+var AppDispatcher = require('../actions/BookActions').AppDispatcher;
+var BookConstants = require('../constants/BookConstants')
 
 var _state = {
     books: [],

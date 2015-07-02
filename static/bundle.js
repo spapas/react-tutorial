@@ -29643,8 +29643,8 @@ module.exports = warning;
 module.exports = require('./lib/React');
 
 },{"./lib/React":34}],162:[function(require,module,exports){
-var BookConstants = require('./constants')
 var Dispatcher = require('flux').Dispatcher;
+var BookConstants = require('../constants/BookConstants')
 var AppDispatcher = new Dispatcher();
 
 
@@ -29684,49 +29684,9 @@ var BookActions = {
 module.exports.BookActions = BookActions;
 module.exports.AppDispatcher = AppDispatcher;
 
-},{"./constants":164,"flux":3}],163:[function(require,module,exports){
+},{"../constants/BookConstants":168,"flux":3}],163:[function(require,module,exports){
 var React = require('react');
-var BookStore = require('./stores').BookStore;
-var BookActions = require('./actions').BookActions;
-
-var BookTableRow = React.createClass({displayName: "BookTableRow",
-    render: function() {
-        return (
-            React.createElement("tr", null, 
-                React.createElement("td", null, this.props.book.id), 
-                React.createElement("td", null, this.props.book.title), 
-                React.createElement("td", null, this.props.book.category), 
-                React.createElement("td", null, React.createElement("a", {href: "#", onClick: this.onClick}, "Edit"))
-            )
-        );
-    },
-    onClick: function(e) {
-        e.preventDefault();
-        BookActions.edit(this.props.book);
-    }
-});
-
-var BookTable = React.createClass({displayName: "BookTable",
-    render: function() {
-        var rows = [];
-        this.props.books.forEach(function(book) {
-            rows.push(React.createElement(BookTableRow, {key: book.id, book: book}));
-        });
-        return (
-            React.createElement("table", null, 
-                React.createElement("thead", null, 
-                    React.createElement("tr", null, 
-                        React.createElement("th", null, "Id"), 
-                        React.createElement("th", null, "Title"), 
-                        React.createElement("th", null, "Category"), 
-                        React.createElement("th", null, "Edit")
-                    )
-                ), 
-                React.createElement("tbody", null, rows)
-            )
-        );
-    }
-});
+var BookActions = require('../actions/BookActions').BookActions;
 
 var BookForm = React.createClass({displayName: "BookForm",
     getInitialState: function() {
@@ -29782,6 +29742,105 @@ var BookForm = React.createClass({displayName: "BookForm",
     }
 });
 
+module.exports.BookForm = BookForm;
+
+},{"../actions/BookActions":162,"react":161}],164:[function(require,module,exports){
+var React = require('react');
+var BookStore = require('../stores/BookStore').BookStore;
+var BookActions = require('../actions/BookActions').BookActions;
+var SearchPanel = require('./SearchPanel.react').SearchPanel;
+var BookTable = require('./BookTable.react').BookTable;
+var BookForm = require('./BookForm.react').BookForm;
+
+var BookPanel = React.createClass({displayName: "BookPanel",
+    getInitialState: function() {
+        return BookStore.getState();
+    },
+    render: function() {
+        return(
+            React.createElement("div", {className: "row"}, 
+                React.createElement("div", {className: "one-half column"}, 
+                    React.createElement(SearchPanel, null), 
+                    React.createElement(BookTable, {books: this.state.books})
+                ), 
+                React.createElement("div", {className: "one-half column"}, 
+                    React.createElement(BookForm, {
+                        book: this.state.editingBook, 
+                        message: this.state.message}
+                    )
+                ), 
+                React.createElement("br", null)
+            )
+        );
+    },
+    _onChange: function() {
+        this.setState( BookStore.getState() );
+    },
+    componentWillUnmount: function() {
+        BookStore.removeChangeListener(this._onChange);
+    },
+    componentDidMount: function() {
+        BookStore.addChangeListener(this._onChange);
+    }
+});
+
+module.exports.BookPanel = BookPanel ;
+
+},{"../actions/BookActions":162,"../stores/BookStore":169,"./BookForm.react":163,"./BookTable.react":165,"./SearchPanel.react":167,"react":161}],165:[function(require,module,exports){
+var React = require('react');
+var BookTableRow = require('./BookTableRow.react').BookTableRow;
+
+var BookTable = React.createClass({displayName: "BookTable",
+    render: function() {
+        var rows = [];
+        this.props.books.forEach(function(book) {
+            rows.push(React.createElement(BookTableRow, {key: book.id, book: book}));
+        });
+        return (
+            React.createElement("table", null, 
+                React.createElement("thead", null, 
+                    React.createElement("tr", null, 
+                        React.createElement("th", null, "Id"), 
+                        React.createElement("th", null, "Title"), 
+                        React.createElement("th", null, "Category"), 
+                        React.createElement("th", null, "Edit")
+                    )
+                ), 
+                React.createElement("tbody", null, rows)
+            )
+        );
+    }
+});
+
+module.exports.BookTable = BookTable ;
+
+},{"./BookTableRow.react":166,"react":161}],166:[function(require,module,exports){
+var React = require('react');
+var BookActions = require('../actions/BookActions').BookActions;
+
+var BookTableRow = React.createClass({displayName: "BookTableRow",
+    render: function() {
+        return (
+            React.createElement("tr", null, 
+                React.createElement("td", null, this.props.book.id), 
+                React.createElement("td", null, this.props.book.title), 
+                React.createElement("td", null, this.props.book.category), 
+                React.createElement("td", null, React.createElement("a", {href: "#", onClick: this.onClick}, "Edit"))
+            )
+        );
+    },
+    onClick: function(e) {
+        e.preventDefault();
+        BookActions.edit(this.props.book);
+    }
+});
+
+module.exports.BookTableRow = BookTableRow;
+
+},{"../actions/BookActions":162,"react":161}],167:[function(require,module,exports){
+var React = require('react');
+var BookActions = require('../actions/BookActions').BookActions;
+
 var SearchPanel = React.createClass({displayName: "SearchPanel",
     getInitialState: function() {
         return {
@@ -29819,41 +29878,9 @@ var SearchPanel = React.createClass({displayName: "SearchPanel",
     }
 });
 
-var BookPanel = React.createClass({displayName: "BookPanel",
-    getInitialState: function() {
-        return BookStore.getState();
-    },
-    render: function() {
-        return(
-            React.createElement("div", {className: "row"}, 
-                React.createElement("div", {className: "one-half column"}, 
-                    React.createElement(SearchPanel, null), 
-                    React.createElement(BookTable, {books: this.state.books})
-                ), 
-                React.createElement("div", {className: "one-half column"}, 
-                    React.createElement(BookForm, {
-                        book: this.state.editingBook, 
-                        message: this.state.message}
-                    )
-                ), 
-                React.createElement("br", null)
-            )
-        );
-    },
-    _onChange: function() {
-        this.setState( BookStore.getState() );
-    },
-    componentWillUnmount: function() {
-        BookStore.removeChangeListener(this._onChange);
-    },
-    componentDidMount: function() {
-        BookStore.addChangeListener(this._onChange);
-    }
-});
+module.exports.SearchPanel = SearchPanel;
 
-module.exports.BookPanel = BookPanel ;
-
-},{"./actions":162,"./stores":165,"react":161}],164:[function(require,module,exports){
+},{"../actions/BookActions":162,"react":161}],168:[function(require,module,exports){
 
 module.exports = {
       BOOK_EDIT: 'BOOK_EDIT',
@@ -29862,11 +29889,11 @@ module.exports = {
       BOOK_SEARCH: 'BOOK_SEARCH',
       BOOK_DELETE: 'BOOK_DELETE'
 };
-},{}],165:[function(require,module,exports){
+},{}],169:[function(require,module,exports){
 var $ = require('jquery');
 var EventEmitter = require('events').EventEmitter;
-var AppDispatcher = require('./actions').AppDispatcher;
-var BookConstants = require('./constants')
+var AppDispatcher = require('../actions/BookActions').AppDispatcher;
+var BookConstants = require('../constants/BookConstants')
 
 var _state = {
     books: [],
@@ -30031,13 +30058,13 @@ AppDispatcher.register(function(action) {
 module.exports.BookStore = BookStore;
 module.exports.reloadBooks = _reloadBooks;
 
-},{"./actions":162,"./constants":164,"events":1,"jquery":6}],166:[function(require,module,exports){
+},{"../actions/BookActions":162,"../constants/BookConstants":168,"events":1,"jquery":6}],170:[function(require,module,exports){
 var React = require('react');
-var components = require('./components');
-var stores = require('./stores');
+var BookPanel = require('./components/BookPanel.react').BookPanel;
+var reloadBooks = require('./stores/BookStore').reloadBooks;
 
-React.render(React.createElement(components.BookPanel, {url: "/api/books/"}), document.getElementById('content'));
+React.render(React.createElement(BookPanel, {url: "/api/books/"}), document.getElementById('content'));
 
-stores.reloadBooks();
+reloadBooks();
 
-},{"./components":163,"./stores":165,"react":161}]},{},[166]);
+},{"./components/BookPanel.react":164,"./stores/BookStore":169,"react":161}]},{},[170]);

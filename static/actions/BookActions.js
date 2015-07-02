@@ -1,5 +1,5 @@
-var BookConstants = require('./constants')
 var Dispatcher = require('flux').Dispatcher;
+var BookConstants = require('../constants/BookConstants')
 var AppDispatcher = new Dispatcher();
 
 

@@ -26,4 +26,11 @@ class SubCategoryViewSet(viewsets.ModelViewSet):
     queryset = SubCategory.objects.all()
     serializer_class = SubCategorySerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('category__name', )
+    search_fields = ('name, category__name', )
+    
+    def get_queryset(self):
+        queryset = SubCategory.objects.all()
+        category = self.request.query_params.get('category', None)
+        if category is not None:
+            queryset = queryset.filter(category_id=category)
+        return queryset

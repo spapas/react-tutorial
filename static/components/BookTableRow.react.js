@@ -14,6 +14,7 @@ var BookTableRow = React.createClass({
     },
     onClick: function(e) {
         e.preventDefault();
+        console.log("Inside BookTableRow.onClick");
         BookActions.edit(this.props.book);
     }
 });

@@ -17,6 +17,8 @@ var BookActions = {
         });
     },
     edit: function(book) {
+        console.log("Inside BookActions.edit");
+        
         AppDispatcher.dispatch({
             actionType: BookConstants.BOOK_EDIT,
             book: book

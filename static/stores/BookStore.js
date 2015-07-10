@@ -95,6 +95,7 @@ var _clearEditingBook = function() {
 };
 
 var _editBook = function(book) {
+    console.log("Inside _editBook");
     _state.editingBook = book;
     BookStore.emitChange();
 };
@@ -110,6 +111,7 @@ var BookStore = $.extend({}, EventEmitter.prototype, {
         return _state;
     },
     emitChange: function() {
+        console.log("Inside BookStore.emitChange");
         this.emit('change');
     },
     addChangeListener: function(callback) {
@@ -142,8 +144,10 @@ var BookStore = {
 */
 
 AppDispatcher.register(function(action) {
+    console.log("Inside AppDispatcher.register");
     switch(action.actionType) {
         case BookConstants.BOOK_EDIT:
+            console.log("Inside AppDispatcher.register case BookConstants.BOOK_EDIT");
             _editBook(action.book);
         break;
         case BookConstants.BOOK_EDIT_CANCEL:

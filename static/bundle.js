@@ -29662,6 +29662,8 @@ var BookActions = {
         });
     },
     edit: function(book) {
+        console.log("Inside BookActions.edit");
+        
         AppDispatcher.dispatch({
             actionType: BookConstants.BOOK_EDIT,
             book: book
@@ -29697,6 +29699,7 @@ var BookForm = React.createClass({displayName: "BookForm",
         }
     },
     componentWillReceiveProps: function(props) {
+        console.log("Inside BookForm.componentWillReceiveProps");
         if (props.book) {
             this.setState(props.book);
         } else {
@@ -29704,6 +29707,7 @@ var BookForm = React.createClass({displayName: "BookForm",
         }
     },
     render: function() {
+        console.log("Inside BookForm.render");
         return(
             React.createElement("form", {onSubmit: this.onSubmit}, 
                 React.createElement("label", {forHtml: "title"}, "Title"), React.createElement("input", {ref: "title", name: "title", type: "text", value: this.state.title, onChange: this.onFormChange}), 
@@ -29774,6 +29778,7 @@ var BookPanel = React.createClass({displayName: "BookPanel",
         );
     },
     _onChange: function() {
+        console.log("Inside BookPanel._onChange");
         this.setState( BookStore.getState() );
     },
     componentWillUnmount: function() {
@@ -29831,6 +29836,7 @@ var BookTableRow = React.createClass({displayName: "BookTableRow",
     },
     onClick: function(e) {
         e.preventDefault();
+        console.log("Inside BookTableRow.onClick");
         BookActions.edit(this.props.book);
     }
 });
@@ -29889,6 +29895,7 @@ module.exports = {
       BOOK_SEARCH: 'BOOK_SEARCH',
       BOOK_DELETE: 'BOOK_DELETE'
 };
+
 },{}],169:[function(require,module,exports){
 var $ = require('jquery');
 var EventEmitter = require('events').EventEmitter;
@@ -29987,6 +29994,7 @@ var _clearEditingBook = function() {
 };
 
 var _editBook = function(book) {
+    console.log("Inside _editBook");
     _state.editingBook = book;
     BookStore.emitChange();
 };
@@ -30002,6 +30010,7 @@ var BookStore = $.extend({}, EventEmitter.prototype, {
         return _state;
     },
     emitChange: function() {
+        console.log("Inside BookStore.emitChange");
         this.emit('change');
     },
     addChangeListener: function(callback) {
@@ -30034,8 +30043,10 @@ var BookStore = {
 */
 
 AppDispatcher.register(function(action) {
+    console.log("Inside AppDispatcher.register");
     switch(action.actionType) {
         case BookConstants.BOOK_EDIT:
+            console.log("Inside AppDispatcher.register case BookConstants.BOOK_EDIT");
             _editBook(action.book);
         break;
         case BookConstants.BOOK_EDIT_CANCEL:

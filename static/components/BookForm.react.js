@@ -10,6 +10,7 @@ var BookForm = React.createClass({
         }
     },
     componentWillReceiveProps: function(props) {
+        console.log("Inside BookForm.componentWillReceiveProps");
         if (props.book) {
             this.setState(props.book);
         } else {
@@ -17,6 +18,7 @@ var BookForm = React.createClass({
         }
     },
     render: function() {
+        console.log("Inside BookForm.render");
         return(
             <form onSubmit={this.onSubmit}>
                 <label forHtml='title'>Title</label><input ref='title' name='title' type='text' value={this.state.title} onChange={this.onFormChange} />

@@ -27,6 +27,7 @@ var BookPanel = React.createClass({
         );
     },
     _onChange: function() {
+        console.log("Inside BookPanel._onChange");
         this.setState( BookStore.getState() );
     },
     componentWillUnmount: function() {

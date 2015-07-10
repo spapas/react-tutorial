@@ -1,15 +1,21 @@
 from django.db import models
 
-
+class Category(models.Model):
+    name = models.CharField(max_length=50)
+    
+    def __unicode__(self):
+        return self.name
+    
+class SubCategory(models.Model):
+    category = models.ForeignKey('Category')
+    name = models.CharField(max_length=50)
+    
+    def __unicode__(self):
+        return self.name
 
 class Book(models.Model):
-    BOOK_CHOICES = (
-        ('CRIME', 'Crime'), 
-        ('HISTORY', 'History'), 
-        ('HORROR', 'Horror'), 
-        ('SCIFI', 'Sci-fi' )
-    )
-    
-    
     title = models.CharField(max_length=50)
-    category = models.CharField(choices=BOOK_CHOICES, max_length=16)
+    subcategory = models.ForeignKey('SubCategory', blank=True, null=True)
+    
+    def __unicode__(self):
+        return self.title

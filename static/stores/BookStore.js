@@ -6,12 +6,20 @@ var BookConstants = require('../constants/BookConstants')
 var _state = {
     books: [],
     message:"",
-    editingBook: null
+    editingBook: null,
+    continueEditing: false,
+    categories: [],
+    subcategories: []
 }
 
+var _categories = []
+
 var _props = {
-    url: '/api/books/'
+    url: '/api/books/',
+    categories_url: '/api/categories/',
+    subcategories_url: '/api/subcategories/'
 }
+
 
 var _search = function(query) {
     $.ajax({
@@ -23,7 +31,6 @@ var _search = function(query) {
             BookStore.emitChange();
         },
         error: function(xhr, status, err) {
-            console.error(this.props.url, status, err.toString());
             _state.message = err.toString();
             BookStore.emitChange();
         }
@@ -45,7 +52,6 @@ var _deleteBook = function(bookId) {
             _reloadBooks();
         },
         error: function(xhr, status, err) {
-            console.error(this.props.url, status, err.toString());
             _state.message = err.toString();
             BookStore.emitChange();
         }
@@ -53,6 +59,7 @@ var _deleteBook = function(bookId) {
 };
 
 var _saveBook = function(book) {
+    delete book.category;
     if(book.id) {
         $.ajax({
             url: _props.url+book.id,
@@ -92,11 +99,14 @@ var _saveBook = function(book) {
 
 var _clearEditingBook = function() {
     _state.editingBook = null;
+    _state.continueEditing = false;
+    _state.categories=_categories;
+    _state.subcategories=[];
 };
 
 var _editBook = function(book) {
-    console.log("Inside _editBook");
     _state.editingBook = book;
+    _state.continueEditing = false;
     BookStore.emitChange();
 };
 
@@ -111,7 +121,6 @@ var BookStore = $.extend({}, EventEmitter.prototype, {
         return _state;
     },
     emitChange: function() {
-        console.log("Inside BookStore.emitChange");
         this.emit('change');
     },
     addChangeListener: function(callback) {
@@ -144,10 +153,8 @@ var BookStore = {
 */
 
 AppDispatcher.register(function(action) {
-    console.log("Inside AppDispatcher.register");
     switch(action.actionType) {
         case BookConstants.BOOK_EDIT:
-            console.log("Inside AppDispatcher.register case BookConstants.BOOK_EDIT");
             _editBook(action.book);
         break;
         case BookConstants.BOOK_EDIT_CANCEL:
@@ -162,10 +169,56 @@ AppDispatcher.register(function(action) {
         case BookConstants.BOOK_DELETE:
             _deleteBook(action.bookId);
         break;
+        case BookConstants.CATEGORY_CHANGE:
+            _load_subcategories(action.cat);
+        break;
     }
     return true;
 });
 
 
+var _load_categories = function() {
+    $.ajax({
+        url: _props.categories_url,
+        dataType: 'json',
+        cache: false,
+        success: function(data) {
+            _state.categories = data;
+            _categories = data;
+            BookStore.emitChange();
+        },
+        error: function(xhr, status, err) {
+            console.error(this.props.url, status, err.toString());
+            _state.message = err.toString();
+            BookStore.emitChange();
+        }
+    });
+};
+
+var _load_subcategories = function(cat) {
+    if(!cat) {
+        _state.subcategories = [];
+        BookStore.emitChange();
+        return ;
+    }
+    $.ajax({
+        url: _props.subcategories_url+'?category='+cat,
+        dataType: 'json',
+        cache: false,
+        success: function(data) {
+            _state.subcategories = data;
+            _state.continueEditing = true;
+            BookStore.emitChange();
+        },
+        error: function(xhr, status, err) {
+            console.error(this.props.url, status, err.toString());
+            _state.message = err.toString();
+            BookStore.emitChange();
+        }
+    });
+};
+
+
 module.exports.BookStore = BookStore;
 module.exports.reloadBooks = _reloadBooks;
+module.exports.loadCategories = _load_categories;

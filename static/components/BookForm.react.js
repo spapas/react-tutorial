@@ -1,5 +1,6 @@
 var React = require('react');
 var BookActions = require('../actions/BookActions').BookActions;
+var DropDown = require('./DropDown.react.js').DropDown;
 
 var BookForm = React.createClass({
     getInitialState: function() {
@@ -10,25 +11,28 @@ var BookForm = React.createClass({
         }
     },
     componentWillReceiveProps: function(props) {
-        console.log("Inside BookForm.componentWillReceiveProps");
-        if (props.book) {
-            this.setState(props.book);
+        if(props.continueEditing) {
+            if(this.state) {
+                this.setState(this.state);
+            }
         } else {
-            this.replaceState({});
-        }
+            if(props.book) {
+                this.setState(props.book);
+            } else {
+                this.replaceState({
+                    category: null,
+                    subcategory: null,
+                });
+            }
+        } 
     },
     render: function() {
-        console.log("Inside BookForm.render");
         return(
             <form onSubmit={this.onSubmit}>
                 <label forHtml='title'>Title</label><input ref='title' name='title' type='text' value={this.state.title} onChange={this.onFormChange} />
                 <label forHtml='category'>Category</label>
-                <select ref='category' name='category' value={this.state.category} onChange={this.onFormChange} >
-                    <option value='CRIME' >Crime</option>
-                    <option value='HISTORY'>History</option>
-                    <option value='HORROR'>Horror</option>
-                    <option value='SCIFI'>SciFi</option>
-                </select>
+                <DropDown options={this.props.categories} dropDownValueChanged={this.onCategoryChanged} value={this.state.category} />
+                <DropDown options={this.props.subcategories} dropDownValueChanged={this.onSubCategoryChanged} value={this.state.subcategory} />
                 <br />
                 <input type='submit' value={this.state.id?"Save (id = " +this.state.id+ ")":"Add"} />
                 {this.state.id?<button onClick={this.onDeleteClick}>Delete</button>:""}
@@ -39,8 +43,7 @@ var BookForm = React.createClass({
     },
     onFormChange: function() {
         this.setState({
-            title: React.findDOMNode(this.refs.title).value,
-            category: React.findDOMNode(this.refs.category).value
+            title: React.findDOMNode(this.refs.title).value
         })
     },
     onSubmit: function(e) {
@@ -54,6 +57,18 @@ var BookForm = React.createClass({
     onDeleteClick: function(e) {
         e.preventDefault();
         BookActions.delete(this.state.id)
+    },
+    onCategoryChanged: function(cat) {
+        BookActions.change_category(cat)
+        this.setState({
+            category: cat,
+            subcategory: ''
+        })
+    },
+    onSubCategoryChanged: function(cat) {
+        this.setState({
+            subcategory: cat
+        })
     }
 });
 

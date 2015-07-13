@@ -17,8 +17,6 @@ var BookActions = {
         });
     },
     edit: function(book) {
-        console.log("Inside BookActions.edit");
-        
         AppDispatcher.dispatch({
             actionType: BookConstants.BOOK_EDIT,
             book: book
@@ -33,6 +31,12 @@ var BookActions = {
         AppDispatcher.dispatch({
             actionType: BookConstants.BOOK_DELETE,
             bookId: bookId
+        });
+    },
+    change_category: function(cat) {
+        AppDispatcher.dispatch({
+            actionType: BookConstants.CATEGORY_CHANGE,
+            cat: cat
         });
     }
 };

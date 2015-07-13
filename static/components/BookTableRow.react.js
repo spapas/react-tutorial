@@ -7,14 +7,14 @@ var BookTableRow = React.createClass({
             <tr>
                 <td>{this.props.book.id}</td>
                 <td>{this.props.book.title}</td>
-                <td>{this.props.book.category}</td>
+                <td>{this.props.book.category_name}</td>
                 <td><a href='#' onClick={this.onClick}>Edit</a></td>
             </tr>
         );
     },
     onClick: function(e) {
         e.preventDefault();
-        console.log("Inside BookTableRow.onClick");
+        BookActions.change_category(this.props.book.category);
         BookActions.edit(this.props.book);
     }
 });

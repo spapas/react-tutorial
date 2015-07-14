@@ -19,7 +19,7 @@ var _props = {
 
 var _search = function() {
     $.ajax({
-        url: _props.url+'?search='+_state.query+"&ordering="+_state.ordering,
+        url: _props.url+'?search='+_state.query+"&ordering="+_state.ordering+"&page="+_state.page,
         dataType: 'json',
         cache: false,
         success: function(data) {
@@ -154,6 +154,10 @@ BookStore.dispatchToken = AppDispatcher.register(function(action) {
         case BookConstants.BOOK_CHANGE:
             _state.editingBook = action.book; 
             BookStore.emitChange();
+        break;
+        case BookConstants.BOOK_PAGE:
+            _state.page = action.page; 
+            _search();
         break;
         case BookConstants.BOOK_SORT:
             if(_state.ordering == action.field) {

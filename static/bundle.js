@@ -29659,6 +29659,12 @@ var BookActions = {
             field: field
         });
     },
+    change_page: function(page) {
+        AppDispatcher.dispatch({
+            actionType: BookConstants.BOOK_PAGE,
+            page: page
+        });
+    },
     search: function(query) {
         AppDispatcher.dispatch({
             actionType: BookConstants.BOOK_SEARCH,
@@ -29693,7 +29699,7 @@ var BookActions = {
 
 module.exports.BookActions = BookActions;
 
-},{"../constants/BookConstants":173,"../dispatcher/AppDispatcher":174}],163:[function(require,module,exports){
+},{"../constants/BookConstants":174,"../dispatcher/AppDispatcher":175}],163:[function(require,module,exports){
 var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
 var BookConstants = require('../constants/BookConstants')
 
@@ -29718,7 +29724,7 @@ var CategoryActions = {
 };
 
 module.exports.CategoryActions = CategoryActions;
-},{"../constants/BookConstants":173,"../dispatcher/AppDispatcher":174}],164:[function(require,module,exports){
+},{"../constants/BookConstants":174,"../dispatcher/AppDispatcher":175}],164:[function(require,module,exports){
 var React = require('react');
 var BookActions = require('../actions/BookActions').BookActions;
 var CategoryActions = require('../actions/CategoryActions').CategoryActions;
@@ -29797,12 +29803,13 @@ var BookForm = React.createClass({displayName: "BookForm",
 
 module.exports.BookForm = BookForm;
 
-},{"../actions/BookActions":162,"../actions/CategoryActions":163,"../stores/BookStore":175,"../stores/CategoryStore":177,"./ButtonPanel.react.js":168,"./DatePicker.react.js":169,"./DropDown.react.js":170,"./StatPanel.react.js":172,"react":161}],165:[function(require,module,exports){
+},{"../actions/BookActions":162,"../actions/CategoryActions":163,"../stores/BookStore":176,"../stores/CategoryStore":178,"./ButtonPanel.react.js":168,"./DatePicker.react.js":169,"./DropDown.react.js":170,"./StatPanel.react.js":173,"react":161}],165:[function(require,module,exports){
 var React = require('react');
 var BookStore = require('../stores/BookStore').BookStore;
 var BookActions = require('../actions/BookActions').BookActions;
 var SearchPanel = require('./SearchPanel.react').SearchPanel;
 var BookTable = require('./BookTable.react').BookTable;
+var PagingPanel = require('./PagingPanel.react').PagingPanel;
 var BookForm = require('./BookForm.react').BookForm;
 
 var reloadBooks = require('../stores/BookStore').reloadBooks;
@@ -29816,7 +29823,8 @@ var BookPanel = React.createClass({displayName: "BookPanel",
             React.createElement("div", {className: "row"}, 
                 React.createElement("div", {className: "one-half column"}, 
                     React.createElement(SearchPanel, null), 
-                    React.createElement(BookTable, {books: this.state.books, ordering: this.state.ordering})
+                    React.createElement(BookTable, {books: this.state.books, ordering: this.state.ordering}), 
+                    React.createElement(PagingPanel, {page_size: "5", total: this.state.total, page: this.state.page})
                 ), 
                 React.createElement("div", {className: "one-half column"}, 
                     React.createElement(BookForm, {
@@ -29843,7 +29851,7 @@ var BookPanel = React.createClass({displayName: "BookPanel",
 
 module.exports.BookPanel = BookPanel ;
 
-},{"../actions/BookActions":162,"../stores/BookStore":175,"./BookForm.react":164,"./BookTable.react":166,"./SearchPanel.react":171,"react":161}],166:[function(require,module,exports){
+},{"../actions/BookActions":162,"../stores/BookStore":176,"./BookForm.react":164,"./BookTable.react":166,"./PagingPanel.react":171,"./SearchPanel.react":172,"react":161}],166:[function(require,module,exports){
 var React = require('react');
 var BookTableRow = require('./BookTableRow.react').BookTableRow;
 var BookActions = require('../actions/BookActions').BookActions;
@@ -29992,6 +30000,36 @@ module.exports.DropDown = DropDown;
 var React = require('react');
 var BookActions = require('../actions/BookActions').BookActions;
 
+var PagingPanel = React.createClass({displayName: "PagingPanel",
+    render: function() {
+        return(
+            React.createElement("div", {className: "row"}, 
+                this.props.page==1?'':React.createElement("button", {onClick: this.onPreviousPageClick}, "<"), 
+                "Page ", this.props.page, " of ", this.getTotalPages(), 
+                this.props.page==this.getTotalPages()?'':React.createElement("button", {onClick: this.onNextPageClick}, ">")
+            )
+        );
+    },
+    onNextPageClick: function(e) {
+        e.preventDefault();
+        BookActions.change_page(this.props.page+1)
+    },
+    onPreviousPageClick: function(e) {
+        e.preventDefault();
+        BookActions.change_page(this.props.page-1)
+    },
+    getTotalPages: function() {
+        return Math.ceil(this.props.total / this.props.page_size);
+    }
+})
+
+
+module.exports.PagingPanel = PagingPanel;
+
+},{"../actions/BookActions":162,"react":161}],172:[function(require,module,exports){
+var React = require('react');
+var BookActions = require('../actions/BookActions').BookActions;
+
 var SearchPanel = React.createClass({displayName: "SearchPanel",
     getInitialState: function() {
         return {
@@ -30031,7 +30069,7 @@ var SearchPanel = React.createClass({displayName: "SearchPanel",
 
 module.exports.SearchPanel = SearchPanel;
 
-},{"../actions/BookActions":162,"react":161}],172:[function(require,module,exports){
+},{"../actions/BookActions":162,"react":161}],173:[function(require,module,exports){
 var React = require('react');
 var CategoryNumberStore = require('../stores/CategoryNumberStore').CategoryNumberStore;
 
@@ -30064,7 +30102,7 @@ var StatPanel = React.createClass({displayName: "StatPanel",
 });
 
 module.exports.StatPanel = StatPanel ;
-},{"../stores/CategoryNumberStore":176,"react":161}],173:[function(require,module,exports){
+},{"../stores/CategoryNumberStore":177,"react":161}],174:[function(require,module,exports){
 
 module.exports = {
       BOOK_CHANGE: 'BOOK_CHANGE',
@@ -30075,16 +30113,17 @@ module.exports = {
       BOOK_DELETE: 'BOOK_DELETE',
       CATEGORY_CHANGE: 'CATEGORY_CHANGE',
       SUBCATEGORY_CHANGE: 'SUBCATEGORY_CHANGE',
-      COUNT_STATS: 'COUNT_STATS'
+      COUNT_STATS: 'COUNT_STATS',
+      BOOK_PAGE: 'BOOK_PAGE'
 };
 
-},{}],174:[function(require,module,exports){
+},{}],175:[function(require,module,exports){
 var Dispatcher = require('flux').Dispatcher;
 var AppDispatcher = new Dispatcher();
 
 module.exports.AppDispatcher = AppDispatcher;
 
-},{"flux":3}],175:[function(require,module,exports){
+},{"flux":3}],176:[function(require,module,exports){
 var $ = require('jquery');
 var EventEmitter = require('events').EventEmitter;
 var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
@@ -30106,7 +30145,7 @@ var _props = {
 
 var _search = function() {
     $.ajax({
-        url: _props.url+'?search='+_state.query+"&ordering="+_state.ordering,
+        url: _props.url+'?search='+_state.query+"&ordering="+_state.ordering+"&page="+_state.page,
         dataType: 'json',
         cache: false,
         success: function(data) {
@@ -30242,6 +30281,10 @@ BookStore.dispatchToken = AppDispatcher.register(function(action) {
             _state.editingBook = action.book; 
             BookStore.emitChange();
         break;
+        case BookConstants.BOOK_PAGE:
+            _state.page = action.page; 
+            _search();
+        break;
         case BookConstants.BOOK_SORT:
             if(_state.ordering == action.field) {
                 _state.ordering = '-'+_state.ordering
@@ -30258,7 +30301,7 @@ BookStore.dispatchToken = AppDispatcher.register(function(action) {
 module.exports.BookStore = BookStore;
 module.exports.reloadBooks = _reloadBooks;
 
-},{"../constants/BookConstants":173,"../dispatcher/AppDispatcher":174,"events":1,"jquery":6}],176:[function(require,module,exports){
+},{"../constants/BookConstants":174,"../dispatcher/AppDispatcher":175,"events":1,"jquery":6}],177:[function(require,module,exports){
 var $ = require('jquery');
 var EventEmitter = require('events').EventEmitter;
 var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
@@ -30342,7 +30385,7 @@ CategoryNumberStore.dispatchToken = AppDispatcher.register(function(action) {
 
 module.exports.CategoryNumberStore = CategoryNumberStore;
 
-},{"../constants/BookConstants":173,"../dispatcher/AppDispatcher":174,"./CategoryStore":177,"events":1,"jquery":6}],177:[function(require,module,exports){
+},{"../constants/BookConstants":174,"../dispatcher/AppDispatcher":175,"./CategoryStore":178,"events":1,"jquery":6}],178:[function(require,module,exports){
 var $ = require('jquery');
 var EventEmitter = require('events').EventEmitter;
 var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
@@ -30439,10 +30482,10 @@ CategoryStore.dispatchToken = AppDispatcher.register(function(action) {
 module.exports.CategoryStore = CategoryStore;
 module.exports.loadCategories = _load_categories;
 
-},{"../actions/CategoryActions":163,"../constants/BookConstants":173,"../dispatcher/AppDispatcher":174,"events":1,"jquery":6}],178:[function(require,module,exports){
+},{"../actions/CategoryActions":163,"../constants/BookConstants":174,"../dispatcher/AppDispatcher":175,"events":1,"jquery":6}],179:[function(require,module,exports){
 var React = require('react');
 var BookPanel = require('./components/BookPanel.react').BookPanel;
 
 React.render(React.createElement(BookPanel, {url: "/api/books/"}), document.getElementById('content'));
 
-},{"./components/BookPanel.react":165,"react":161}]},{},[178]);
+},{"./components/BookPanel.react":165,"react":161}]},{},[179]);

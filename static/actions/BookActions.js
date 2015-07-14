@@ -14,6 +14,12 @@ var BookActions = {
             field: field
         });
     },
+    change_page: function(page) {
+        AppDispatcher.dispatch({
+            actionType: BookConstants.BOOK_PAGE,
+            page: page
+        });
+    },
     search: function(query) {
         AppDispatcher.dispatch({
             actionType: BookConstants.BOOK_SEARCH,

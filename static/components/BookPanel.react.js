@@ -3,6 +3,7 @@ var BookStore = require('../stores/BookStore').BookStore;
 var BookActions = require('../actions/BookActions').BookActions;
 var SearchPanel = require('./SearchPanel.react').SearchPanel;
 var BookTable = require('./BookTable.react').BookTable;
+var PagingPanel = require('./PagingPanel.react').PagingPanel;
 var BookForm = require('./BookForm.react').BookForm;
 
 var reloadBooks = require('../stores/BookStore').reloadBooks;
@@ -17,6 +18,7 @@ var BookPanel = React.createClass({
                 <div className="one-half column">
                     <SearchPanel></SearchPanel>
                     <BookTable books={this.state.books} ordering={this.state.ordering} />
+                    <PagingPanel page_size='5' total={this.state.total} page={this.state.page} />
                 </div>
                 <div className="one-half column">
                     <BookForm

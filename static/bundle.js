@@ -29643,12 +29643,22 @@ module.exports = warning;
 module.exports = require('./lib/React');
 
 },{"./lib/React":34}],162:[function(require,module,exports){
-var Dispatcher = require('flux').Dispatcher;
 var BookConstants = require('../constants/BookConstants')
-var AppDispatcher = new Dispatcher();
-
+var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
 
 var BookActions = {
+    change_book: function(book) {
+        AppDispatcher.dispatch({
+            actionType: BookConstants.BOOK_CHANGE,
+            book: book
+        });
+    },
+    sort_books: function(field) {
+        AppDispatcher.dispatch({
+            actionType: BookConstants.BOOK_SORT,
+            field: field
+        });
+    },
     search: function(query) {
         AppDispatcher.dispatch({
             actionType: BookConstants.BOOK_SEARCH,
@@ -29677,97 +29687,117 @@ var BookActions = {
             actionType: BookConstants.BOOK_DELETE,
             bookId: bookId
         });
-    },
-    change_category: function(cat) {
-        AppDispatcher.dispatch({
-            actionType: BookConstants.CATEGORY_CHANGE,
-            cat: cat
-        });
     }
 };
 
 
 module.exports.BookActions = BookActions;
-module.exports.AppDispatcher = AppDispatcher;
 
-},{"../constants/BookConstants":169,"flux":3}],163:[function(require,module,exports){
+},{"../constants/BookConstants":173,"../dispatcher/AppDispatcher":174}],163:[function(require,module,exports){
+var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
+var BookConstants = require('../constants/BookConstants')
+
+var CategoryActions = {
+    change_category: function(cat) {
+        AppDispatcher.dispatch({
+            actionType: BookConstants.CATEGORY_CHANGE,
+            cat: cat
+        });
+    },
+    change_subcategory: function(cat) {
+        AppDispatcher.dispatch({
+            actionType: BookConstants.SUBCATEGORY_CHANGE,
+            cat: cat
+        });
+    },
+    count_stats: function(cat, subcat) {
+        AppDispatcher.dispatch({
+            actionType: BookConstants.COUNT_STATS
+        });
+    },
+};
+
+module.exports.CategoryActions = CategoryActions;
+},{"../constants/BookConstants":173,"../dispatcher/AppDispatcher":174}],164:[function(require,module,exports){
 var React = require('react');
 var BookActions = require('../actions/BookActions').BookActions;
+var CategoryActions = require('../actions/CategoryActions').CategoryActions;
 var DropDown = require('./DropDown.react.js').DropDown;
+var StatPanel = require('./StatPanel.react.js').StatPanel;
+var DatePicker = require('./DatePicker.react.js').DatePicker;
+var ButtonPanel = require('./ButtonPanel.react.js').ButtonPanel;
+var BookStore = require('../stores/BookStore').BookStore;
+var CategoryStore = require('../stores/CategoryStore').CategoryStore;
+var loadCategories = require('../stores/CategoryStore').loadCategories;
+
 
 var BookForm = React.createClass({displayName: "BookForm",
     getInitialState: function() {
-        if (this.props.book) {
-            return this.props.book;
-        } else {
-            return {};
-        }
-    },
-    componentWillReceiveProps: function(props) {
-        if(props.continueEditing) {
-            if(this.state) {
-                this.setState(this.state);
-            }
-        } else {
-            if(props.book) {
-                this.setState(props.book);
-            } else {
-                this.replaceState({
-                    category: null,
-                    subcategory: null,
-                });
-            }
-        } 
+        return {};
     },
     render: function() {
         return(
             React.createElement("form", {onSubmit: this.onSubmit}, 
-                React.createElement("label", {forHtml: "title"}, "Title"), React.createElement("input", {ref: "title", name: "title", type: "text", value: this.state.title, onChange: this.onFormChange}), 
-                React.createElement("label", {forHtml: "category"}, "Category"), 
-                React.createElement(DropDown, {options: this.props.categories, dropDownValueChanged: this.onCategoryChanged, value: this.state.category}), 
-                React.createElement(DropDown, {options: this.props.subcategories, dropDownValueChanged: this.onSubCategoryChanged, value: this.state.subcategory}), 
-                React.createElement("br", null), 
-                React.createElement("input", {type: "submit", value: this.state.id?"Save (id = " +this.state.id+ ")":"Add"}), 
-                this.state.id?React.createElement("button", {onClick: this.onDeleteClick}, "Delete"):"", 
-                this.state.id?React.createElement("button", {onClick: this.onCancelClick}, "Cancel"):"", 
-                this.props.message?React.createElement("div", null, this.props.message):""
+                React.createElement("div", {className: "row"}, 
+                    React.createElement("div", {className: "one-half column"}, 
+                        React.createElement("label", {forHtml: "title"}, "Title"), React.createElement("input", {ref: "title", name: "title", type: "text", value: this.props.book.title, onChange: this.onTitleChange})
+                    ), 
+                    React.createElement("div", {className: "one-half column"}, 
+                        React.createElement("label", {forHtml: "date"}, "Publish date"), React.createElement(DatePicker, {ref: "date", onChange: this.onDateChange, value: this.props.book.publish_date})
+                    )
+                ), 
+                React.createElement("div", {className: "row"}, 
+                    React.createElement("div", {className: "one-half column"}, 
+                        React.createElement("label", {forHtml: "category"}, "Category"), 
+                        React.createElement(DropDown, {options: this.state.categories, dropDownValueChanged: this.onCategoryChanged, value: this.props.book.category}), 
+                        React.createElement(DropDown, {options: this.state.subcategories, dropDownValueChanged: this.onSubCategoryChanged, value: this.props.book.subcategory})
+                    )
+                ), 
+                
+                React.createElement(ButtonPanel, {book: this.props.book, message: this.props.message}), 
+                React.createElement(StatPanel, null)
             )
         );
     },
-    onFormChange: function() {
-        this.setState({
-            title: React.findDOMNode(this.refs.title).value
-        })
-    },
     onSubmit: function(e) {
         e.preventDefault();
-        BookActions.save(this.state)
+        BookActions.save(this.props.book)
     },
-    onCancelClick: function(e) {
-        e.preventDefault();
-        BookActions.edit_cancel()
+    onTitleChange: function() {
+        this.props.book.title = React.findDOMNode(this.refs.title).value;
+        BookActions.change_book(this.props.book);
     },
-    onDeleteClick: function(e) {
-        e.preventDefault();
-        BookActions.delete(this.state.id)
+    onDateChange: function(date) {
+        this.props.book.publish_date = date;
+        BookActions.change_book(this.props.book);
     },
+    
     onCategoryChanged: function(cat) {
-        BookActions.change_category(cat)
-        this.setState({
-            category: cat,
-            subcategory: ''
-        })
+        this.props.book.category = cat;
+        BookActions.change_book(this.props.book);
+        CategoryActions.change_category(cat)
     },
     onSubCategoryChanged: function(cat) {
-        this.setState({
-            subcategory: cat
-        })
+        this.props.book.subcategory = cat;
+        BookActions.change_book(this.props.book);
+        CategoryActions.change_subcategory(cat)
+    },
+    _onChange: function() {
+        this.setState(CategoryStore.getState());
+    },
+    componentWillUnmount: function() {
+        CategoryStore.removeChangeListener(this._onChange);
+    },
+    componentDidMount: function() {
+        CategoryStore.addChangeListener(this._onChange);
+        loadCategories();
     }
 });
 
+
 module.exports.BookForm = BookForm;
 
-},{"../actions/BookActions":162,"./DropDown.react.js":167,"react":161}],164:[function(require,module,exports){
+},{"../actions/BookActions":162,"../actions/CategoryActions":163,"../stores/BookStore":175,"../stores/CategoryStore":177,"./ButtonPanel.react.js":168,"./DatePicker.react.js":169,"./DropDown.react.js":170,"./StatPanel.react.js":172,"react":161}],165:[function(require,module,exports){
 var React = require('react');
 var BookStore = require('../stores/BookStore').BookStore;
 var BookActions = require('../actions/BookActions').BookActions;
@@ -29776,7 +29806,6 @@ var BookTable = require('./BookTable.react').BookTable;
 var BookForm = require('./BookForm.react').BookForm;
 
 var reloadBooks = require('../stores/BookStore').reloadBooks;
-var loadCategories = require('../stores/BookStore').loadCategories;
 
 var BookPanel = React.createClass({displayName: "BookPanel",
     getInitialState: function() {
@@ -29787,14 +29816,12 @@ var BookPanel = React.createClass({displayName: "BookPanel",
             React.createElement("div", {className: "row"}, 
                 React.createElement("div", {className: "one-half column"}, 
                     React.createElement(SearchPanel, null), 
-                    React.createElement(BookTable, {books: this.state.books})
+                    React.createElement(BookTable, {books: this.state.books, ordering: this.state.ordering})
                 ), 
                 React.createElement("div", {className: "one-half column"}, 
                     React.createElement(BookForm, {
                         book: this.state.editingBook, 
                         message: this.state.message, 
-                        categories: this.state.categories, 
-                        subcategories: this.state.subcategories, 
                         continueEditing: this.state.continueEditing}
                     )
                 ), 
@@ -29809,19 +29836,17 @@ var BookPanel = React.createClass({displayName: "BookPanel",
         BookStore.removeChangeListener(this._onChange);
     },
     componentDidMount: function() {
-        
-
         reloadBooks();
-        loadCategories();
         BookStore.addChangeListener(this._onChange);
     }
 });
 
 module.exports.BookPanel = BookPanel ;
 
-},{"../actions/BookActions":162,"../stores/BookStore":170,"./BookForm.react":163,"./BookTable.react":165,"./SearchPanel.react":168,"react":161}],165:[function(require,module,exports){
+},{"../actions/BookActions":162,"../stores/BookStore":175,"./BookForm.react":164,"./BookTable.react":166,"./SearchPanel.react":171,"react":161}],166:[function(require,module,exports){
 var React = require('react');
 var BookTableRow = require('./BookTableRow.react').BookTableRow;
+var BookActions = require('../actions/BookActions').BookActions;
 
 var BookTable = React.createClass({displayName: "BookTable",
     render: function() {
@@ -29833,23 +29858,35 @@ var BookTable = React.createClass({displayName: "BookTable",
             React.createElement("table", null, 
                 React.createElement("thead", null, 
                     React.createElement("tr", null, 
-                        React.createElement("th", null, "Id"), 
-                        React.createElement("th", null, "Title"), 
-                        React.createElement("th", null, "Category"), 
+                        React.createElement("th", null, React.createElement("a", {href: "#", onClick: this.onClick.bind(this, 'id')}, this.showOrdering('id'), " Id")), 
+                        React.createElement("th", null, React.createElement("a", {href: "#", onClick: this.onClick.bind(this, 'title')}, this.showOrdering('title'), " Title")), 
+                        React.createElement("th", null, React.createElement("a", {href: "#", onClick: this.onClick.bind(this, 'subcategory__name')}, this.showOrdering('subcategory__name'), " Category")), 
+                        React.createElement("th", null, React.createElement("a", {href: "#", onClick: this.onClick.bind(this, 'publish_date')}, this.showOrdering('publish_date'), " Publish date")), 
                         React.createElement("th", null, "Edit")
                     )
                 ), 
                 React.createElement("tbody", null, rows)
             )
         );
+    },
+    onClick: function(v) {
+        BookActions.sort_books(v);
+    },
+    showOrdering: function(v) {
+        if (v==this.props.ordering) {
+            return '+'
+        } else if ('-'+v==this.props.ordering) {
+            return '-'
+        }
     }
 });
 
 module.exports.BookTable = BookTable ;
 
-},{"./BookTableRow.react":166,"react":161}],166:[function(require,module,exports){
+},{"../actions/BookActions":162,"./BookTableRow.react":167,"react":161}],167:[function(require,module,exports){
 var React = require('react');
 var BookActions = require('../actions/BookActions').BookActions;
+var CategoryActions = require('../actions/CategoryActions').CategoryActions;
 
 var BookTableRow = React.createClass({displayName: "BookTableRow",
     render: function() {
@@ -29858,24 +29895,76 @@ var BookTableRow = React.createClass({displayName: "BookTableRow",
                 React.createElement("td", null, this.props.book.id), 
                 React.createElement("td", null, this.props.book.title), 
                 React.createElement("td", null, this.props.book.category_name), 
+                React.createElement("td", null, this.props.book.publish_date), 
                 React.createElement("td", null, React.createElement("a", {href: "#", onClick: this.onClick}, "Edit"))
             )
         );
     },
     onClick: function(e) {
         e.preventDefault();
-        BookActions.change_category(this.props.book.category);
-        BookActions.edit(this.props.book);
+        BookActions.edit($.extend({}, this.props.book));
+        CategoryActions.change_category(this.props.book.category);
+        CategoryActions.change_subcategory(this.props.book.subcategory);
     }
 });
 
 module.exports.BookTableRow = BookTableRow;
 
-},{"../actions/BookActions":162,"react":161}],167:[function(require,module,exports){
+},{"../actions/BookActions":162,"../actions/CategoryActions":163,"react":161}],168:[function(require,module,exports){
+var React = require('react');
+var BookActions = require('../actions/BookActions').BookActions;
+
+var ButtonPanel = React.createClass({displayName: "ButtonPanel",
+    render: function() {
+        return(
+            React.createElement("div", {className: "row"}, 
+                React.createElement("input", {type: "submit", value: this.props.book.id?"Save (id = " +this.props.book.id+ ")":"Add"}), 
+                this.props.book.id?React.createElement("button", {onClick: this.onDeleteClick}, "Delete"):"", 
+                this.props.book.id?React.createElement("button", {onClick: this.onCancelClick}, "Cancel"):"", 
+                this.props.message?React.createElement("div", {className: this.props.message.color}, this.props.message.text):""
+            )
+        );
+    },
+    onCancelClick: function(e) {
+        e.preventDefault();
+        BookActions.edit_cancel()
+    },
+    onDeleteClick: function(e) {
+        e.preventDefault();
+        BookActions.delete(this.props.book.id)
+    }
+})
+
+
+module.exports.ButtonPanel = ButtonPanel;
+
+},{"../actions/BookActions":162,"react":161}],169:[function(require,module,exports){
+var React = require('react');
+
+var DatePicker = React.createClass({displayName: "DatePicker",
+    render: function() {
+        return(
+            React.createElement("input", {type: "text", ref: "date", value: this.props.value, onChange: this.handleChange})
+        );
+    },
+    componentDidMount: function() {
+        $(React.findDOMNode(this)).datepicker({ dateFormat: 'yy-mm-dd' });
+        $(React.findDOMNode(this)).on('change', this.handleChange);
+    },
+    componentWillUnmount: function() {
+    
+    },
+    handleChange: function() {
+        var date = React.findDOMNode(this.refs.date).value
+        this.props.onChange(date);
+    }
+});
+
+module.exports.DatePicker = DatePicker ;
+},{"react":161}],170:[function(require,module,exports){
 var React = require('react');
 
 var DropDown = React.createClass({displayName: "DropDown",
-
     render: function() {
         var options = [];
         options.push(React.createElement("option", {key: "-1", value: ""}, "---"));
@@ -29884,6 +29973,7 @@ var DropDown = React.createClass({displayName: "DropDown",
                 options.push(React.createElement("option", {key: option.id, value: option.id}, option.name));
             });
         }
+        
         return(
             React.createElement("select", {ref: "dropdown", value: this.props.value?this.props.value:'', onChange: this.onFormChange}, 
                 options
@@ -29898,7 +29988,7 @@ var DropDown = React.createClass({displayName: "DropDown",
 
 module.exports.DropDown = DropDown;
 
-},{"react":161}],168:[function(require,module,exports){
+},{"react":161}],171:[function(require,module,exports){
 var React = require('react');
 var BookActions = require('../actions/BookActions').BookActions;
 
@@ -29941,52 +30031,93 @@ var SearchPanel = React.createClass({displayName: "SearchPanel",
 
 module.exports.SearchPanel = SearchPanel;
 
-},{"../actions/BookActions":162,"react":161}],169:[function(require,module,exports){
+},{"../actions/BookActions":162,"react":161}],172:[function(require,module,exports){
+var React = require('react');
+var CategoryNumberStore = require('../stores/CategoryNumberStore').CategoryNumberStore;
+
+var StatPanel = React.createClass({displayName: "StatPanel",
+    getInitialState: function() {
+        return {};
+    },
+    render: function() {
+        return(
+            React.createElement("div", {className: "row"}, 
+                React.createElement("div", {className: "one-half column"}, 
+                    "Books in category: ", this.state.category_books
+                ), 
+                React.createElement("div", {className: "one-half column"}, 
+                    "Books in subcategory: ", this.state.subcategory_books
+                ), 
+                React.createElement("br", null)
+            )
+        );
+    },
+    _onChange: function() {
+        this.setState(CategoryNumberStore.getState());
+    },
+    componentWillUnmount: function() {
+        CategoryNumberStore.removeChangeListener(this._onChange);
+    },
+    componentDidMount: function() {
+        CategoryNumberStore.addChangeListener(this._onChange);
+    }
+});
+
+module.exports.StatPanel = StatPanel ;
+},{"../stores/CategoryNumberStore":176,"react":161}],173:[function(require,module,exports){
 
 module.exports = {
+      BOOK_CHANGE: 'BOOK_CHANGE',
       BOOK_EDIT: 'BOOK_EDIT',
       BOOK_EDIT_CANCEL: 'BOOK_EDIT_CANCEL',
       BOOK_SAVE: 'BOOK_SAVE',
       BOOK_SEARCH: 'BOOK_SEARCH',
       BOOK_DELETE: 'BOOK_DELETE',
-      CATEGORY_CHANGE: 'CATEGORY_CHANGE'
+      CATEGORY_CHANGE: 'CATEGORY_CHANGE',
+      SUBCATEGORY_CHANGE: 'SUBCATEGORY_CHANGE',
+      COUNT_STATS: 'COUNT_STATS'
 };
 
-},{}],170:[function(require,module,exports){
+},{}],174:[function(require,module,exports){
+var Dispatcher = require('flux').Dispatcher;
+var AppDispatcher = new Dispatcher();
+
+module.exports.AppDispatcher = AppDispatcher;
+
+},{"flux":3}],175:[function(require,module,exports){
 var $ = require('jquery');
 var EventEmitter = require('events').EventEmitter;
-var AppDispatcher = require('../actions/BookActions').AppDispatcher;
+var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
 var BookConstants = require('../constants/BookConstants')
 
 var _state = {
     books: [],
-    message:"",
-    editingBook: null,
-    continueEditing: false,
-    categories: [],
-    subcategories: []
+    message:{},
+    page: 1,
+    total: 0,
+    editingBook: {},
+    query:'',
+    ordering:''
 }
-
-var _categories = []
 
 var _props = {
-    url: '/api/books/',
-    categories_url: '/api/categories/',
-    subcategories_url: '/api/subcategories/'
+    url: '/api/books/'
 }
 
-
-var _search = function(query) {
+var _search = function() {
     $.ajax({
-        url: _props.url+'?search='+query,
+        url: _props.url+'?search='+_state.query+"&ordering="+_state.ordering,
         dataType: 'json',
         cache: false,
         success: function(data) {
-            _state.books = data;
+            _state.books = data.results;
+            _state.total = data.count;
+            
             BookStore.emitChange();
         },
         error: function(xhr, status, err) {
-            _state.message = err.toString();
+            _state.message.text = err.toString();
+            _state.message.color  = 'red'
             BookStore.emitChange();
         }
     });
@@ -30002,12 +30133,14 @@ var _deleteBook = function(bookId) {
         method: 'DELETE',
         cache: false,
         success: function(data) {
-            _state.message = "Successfully deleted book!"
+            _state.message.text = "Successfully deleted book!"
+            _state.message.color = 'green'
             _clearEditingBook();
             _reloadBooks();
         },
         error: function(xhr, status, err) {
             _state.message = err.toString();
+            _state.message.color = 'red'
             BookStore.emitChange();
         }
     });
@@ -30023,12 +30156,14 @@ var _saveBook = function(book) {
             data:book,
             cache: false,
             success: function(data) {
-                _state.message = "Successfully updated book!"
+                _state.message.text = "Successfully updated book!"
+                _state.message.color  = 'green'
                 _clearEditingBook();
                 _reloadBooks();
             },
             error: function(xhr, status, err) {
-                _state.message = err.toString()
+                _state.message.text = err.toString()
+                _state.message.color  = 'red'
                 BookStore.emitChange();
             }
         });
@@ -30040,12 +30175,14 @@ var _saveBook = function(book) {
             data:book,
             cache: false,
             success: function(data) {
-                _state.message = "Successfully added book!"
+                _state.message.text = "Successfully added book!"
+                _state.message.color  = 'green'
                 _clearEditingBook();
                 _reloadBooks();
             },
             error: function(xhr, status, err) {
-                _state.message = err.toString()
+                _state.message.text = err.toString()
+                _state.message.color  = 'red'
                 BookStore.emitChange();
             }
         });
@@ -30053,15 +30190,11 @@ var _saveBook = function(book) {
 };
 
 var _clearEditingBook = function() {
-    _state.editingBook = null;
-    _state.continueEditing = false;
-    _state.categories=_categories;
-    _state.subcategories=[];
+    _state.editingBook = {};
 };
 
 var _editBook = function(book) {
     _state.editingBook = book;
-    _state.continueEditing = false;
     BookStore.emitChange();
 };
 
@@ -30086,28 +30219,8 @@ var BookStore = $.extend({}, EventEmitter.prototype, {
     }
 });
 
-/*
-var BookStore = {
-    listeners: [],
-    getState: function() {
-        return _state;
-    },
-    emitChange: function() {
-        var i;
-        for(i=0;i<this.listeners.length;i++) {
-            this.listeners[i]();
-        }
-    },
-    addChangeListener: function(callback) {
-        this.listeners.push(callback);
-    },
-    removeChangeListener: function(callback) {
-        this.listeners.splice(this.listeners.indexOf(callback), 1);
-    }
-};
-*/
 
-AppDispatcher.register(function(action) {
+BookStore.dispatchToken = AppDispatcher.register(function(action) {
     switch(action.actionType) {
         case BookConstants.BOOK_EDIT:
             _editBook(action.book);
@@ -30119,20 +30232,138 @@ AppDispatcher.register(function(action) {
             _saveBook(action.book);
         break;
         case BookConstants.BOOK_SEARCH:
-            _search(action.query);
+            _state.query = action.query
+            _search();
         break;
         case BookConstants.BOOK_DELETE:
             _deleteBook(action.bookId);
         break;
-        case BookConstants.CATEGORY_CHANGE:
-            _load_subcategories(action.cat);
+        case BookConstants.BOOK_CHANGE:
+            _state.editingBook = action.book; 
+            BookStore.emitChange();
+        break;
+        case BookConstants.BOOK_SORT:
+            if(_state.ordering == action.field) {
+                _state.ordering = '-'+_state.ordering
+            } else {
+                _state.ordering = action.field;
+            }
+            _search();
         break;
     }
     return true;
 });
 
 
+module.exports.BookStore = BookStore;
+module.exports.reloadBooks = _reloadBooks;
+
+},{"../constants/BookConstants":173,"../dispatcher/AppDispatcher":174,"events":1,"jquery":6}],176:[function(require,module,exports){
+var $ = require('jquery');
+var EventEmitter = require('events').EventEmitter;
+var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
+var BookConstants = require('../constants/BookConstants')
+var CategoryStore = require('./CategoryStore').CategoryStore;
+
+
+var _state = {
+    category_books: "-",
+    subcategory_books: "-"
+}
+
+_category = undefined;
+_subcategory = undefined;
+
+var CategoryNumberStore = $.extend({}, EventEmitter.prototype, {
+    getState: function() {
+        return _state;
+    },
+    emitChange: function() {
+        this.emit('change');
+    },
+    addChangeListener: function(callback) {
+        this.on('change', callback);
+    },
+    removeChangeListener: function(callback) {
+        this.removeListener('change', callback);
+    }
+});
+
+var _get_stats = function() {
+    var i;
+    var categoryState = CategoryStore.getState();
+
+    _state = {
+        category_books: "-",
+        subcategory_books: "-"
+    }
+
+    for(i=0;i<categoryState.categories.length;i++) {
+        if(categoryState.categories[i].id == _category) {
+            _state.category_books = categoryState.categories[i].number_of_books;
+        }
+    }
+
+    for(i=0;i<categoryState.subcategories.length;i++) {
+        if(categoryState.subcategories[i].id == _subcategory ) {
+            _state.subcategory_books = categoryState.subcategories[i].number_of_books;
+        }
+    }
+}
+
+CategoryNumberStore.dispatchToken = AppDispatcher.register(function(action) {
+
+    switch(action.actionType) {
+        case BookConstants.CATEGORY_CHANGE:
+            _category = action.cat;
+            _get_stats();
+            CategoryNumberStore.emitChange();
+        break;
+        case BookConstants.SUBCATEGORY_CHANGE:
+            _subcategory = action.cat;
+            _get_stats();
+            CategoryNumberStore.emitChange();
+        break;
+        case BookConstants.COUNT_STATS:
+            AppDispatcher.waitFor([CategoryStore.dispatchToken]);
+            _get_stats();
+            CategoryNumberStore.emitChange();
+        break;
+        case BookConstants.BOOK_EDIT_CANCEL:
+            _category = undefined;
+            _subcategory = undefined;
+            _get_stats();
+            CategoryNumberStore.emitChange();
+        break;
+    }
+    return true;
+});
+
+
+module.exports.CategoryNumberStore = CategoryNumberStore;
+
+},{"../constants/BookConstants":173,"../dispatcher/AppDispatcher":174,"./CategoryStore":177,"events":1,"jquery":6}],177:[function(require,module,exports){
+var $ = require('jquery');
+var EventEmitter = require('events').EventEmitter;
+var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
+var BookConstants = require('../constants/BookConstants');
+var CategoryActions = require('../actions/CategoryActions').CategoryActions;
+
+var _state = {
+    categories: [],
+    subcategories: []
+}
+
+var _categories = []
+
+var _props = {
+    categories_url: '/api/categories/',
+    subcategories_url: '/api/subcategories/'
+}
+
+
 var _load_categories = function() {
+    console.log("LOAD")
     $.ajax({
         url: _props.categories_url,
         dataType: 'json',
@@ -30140,20 +30371,21 @@ var _load_categories = function() {
         success: function(data) {
             _state.categories = data;
             _categories = data;
-            BookStore.emitChange();
+            CategoryStore.emitChange();
         },
         error: function(xhr, status, err) {
             console.error(this.props.url, status, err.toString());
             _state.message = err.toString();
-            BookStore.emitChange();
+            CategoryStore.emitChange();
         }
     });
 };
 
 var _load_subcategories = function(cat) {
+    
     if(!cat) {
         _state.subcategories = [];
-        BookStore.emitChange();
+        CategoryStore.emitChange();
         return ;
     }
     $.ajax({
@@ -30162,32 +30394,55 @@ var _load_subcategories = function(cat) {
         cache: false,
         success: function(data) {
             _state.subcategories = data;
-            _state.continueEditing = true;
-            BookStore.emitChange();
+            CategoryStore.emitChange();
+            CategoryActions.count_stats()
         },
         error: function(xhr, status, err) {
             console.error(this.props.url, status, err.toString());
             _state.message = err.toString();
-            BookStore.emitChange();
+            CategoryStore.emitChange();
         }
     });
 };
 
+var CategoryStore = $.extend({}, EventEmitter.prototype, {
+    getState: function() {
+        return _state;
+    },
+    emitChange: function() {
+        this.emit('change');
+    },
+    addChangeListener: function(callback) {
+        this.on('change', callback);
+    },
+    removeChangeListener: function(callback) {
+        this.removeListener('change', callback);
+    }
+});
 
-module.exports.BookStore = BookStore;
-module.exports.reloadBooks = _reloadBooks;
+
+CategoryStore.dispatchToken = AppDispatcher.register(function(action) {
+    switch(action.actionType) {
+        case BookConstants.CATEGORY_CHANGE:
+            _load_subcategories(action.cat);
+        break;
+        case BookConstants.SUBCATEGORY_CHANGE:
+        break;
+        case BookConstants.BOOK_EDIT_CANCEL:
+            CategoryStore.emitChange();
+        break;
+    }
+    return true;
+});
+
+
+module.exports.CategoryStore = CategoryStore;
 module.exports.loadCategories = _load_categories;
 
-},{"../actions/BookActions":162,"../constants/BookConstants":169,"events":1,"jquery":6}],171:[function(require,module,exports){
+},{"../actions/CategoryActions":163,"../constants/BookConstants":173,"../dispatcher/AppDispatcher":174,"events":1,"jquery":6}],178:[function(require,module,exports){
 var React = require('react');
 var BookPanel = require('./components/BookPanel.react').BookPanel;
-var reloadBooks = require('./stores/BookStore').reloadBooks;
-var loadCategories = require('./stores/BookStore').loadCategories;
-
 
 React.render(React.createElement(BookPanel, {url: "/api/books/"}), document.getElementById('content'));
 
-reloadBooks();
-loadCategories();
-
-},{"./components/BookPanel.react":164,"./stores/BookStore":170,"react":161}]},{},[171]);
+},{"./components/BookPanel.react":165,"react":161}]},{},[178]);

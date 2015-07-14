@@ -1,18 +1,24 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from rest_framework import viewsets, filters
+from rest_framework.pagination import PageNumberPagination
 from books.models import Book, Category, SubCategory
 from books.serializers import BookSerializer, CategorySerializer, SubCategorySerializer
 
 class HomeTemplateView(TemplateView, ):
     template_name = 'home.html'
 
+class SmallPageNumberPagination(PageNumberPagination):
+    page_size = 5
 
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     search_fields = ('title', 'subcategory__category__name', 'subcategory__name')
+    pagination_class = SmallPageNumberPagination
+    ordering_fields = ('subcategory__name', 'id', 'title', 'publish_date', )
+    ordering = ('title',)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

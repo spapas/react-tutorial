@@ -1,9 +1,19 @@
-var Dispatcher = require('flux').Dispatcher;
 var BookConstants = require('../constants/BookConstants')
-var AppDispatcher = new Dispatcher();
-
+var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
 
 var BookActions = {
+    change_book: function(book) {
+        AppDispatcher.dispatch({
+            actionType: BookConstants.BOOK_CHANGE,
+            book: book
+        });
+    },
+    sort_books: function(field) {
+        AppDispatcher.dispatch({
+            actionType: BookConstants.BOOK_SORT,
+            field: field
+        });
+    },
     search: function(query) {
         AppDispatcher.dispatch({
             actionType: BookConstants.BOOK_SEARCH,
@@ -32,15 +42,8 @@ var BookActions = {
             actionType: BookConstants.BOOK_DELETE,
             bookId: bookId
         });
-    },
-    change_category: function(cat) {
-        AppDispatcher.dispatch({
-            actionType: BookConstants.CATEGORY_CHANGE,
-            cat: cat
-        });
     }
 };
 
 
 module.exports.BookActions = BookActions;
-module.exports.AppDispatcher = AppDispatcher;

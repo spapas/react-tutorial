@@ -6,7 +6,6 @@ var BookTable = require('./BookTable.react').BookTable;
 var BookForm = require('./BookForm.react').BookForm;
 
 var reloadBooks = require('../stores/BookStore').reloadBooks;
-var loadCategories = require('../stores/BookStore').loadCategories;
 
 var BookPanel = React.createClass({
     getInitialState: function() {
@@ -17,14 +16,12 @@ var BookPanel = React.createClass({
             <div className="row">
                 <div className="one-half column">
                     <SearchPanel></SearchPanel>
-                    <BookTable books={this.state.books} />
+                    <BookTable books={this.state.books} ordering={this.state.ordering} />
                 </div>
                 <div className="one-half column">
                     <BookForm
                         book={this.state.editingBook}
                         message={this.state.message}
-                        categories={this.state.categories}
-                        subcategories={this.state.subcategories}
                         continueEditing={this.state.continueEditing}
                     />
                 </div>
@@ -39,10 +36,7 @@ var BookPanel = React.createClass({
         BookStore.removeChangeListener(this._onChange);
     },
     componentDidMount: function() {
-        
-
         reloadBooks();
-        loadCategories();
         BookStore.addChangeListener(this._onChange);
     }
 });

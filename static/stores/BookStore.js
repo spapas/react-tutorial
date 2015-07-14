@@ -1,37 +1,36 @@
 var $ = require('jquery');
 var EventEmitter = require('events').EventEmitter;
-var AppDispatcher = require('../actions/BookActions').AppDispatcher;
+var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
 var BookConstants = require('../constants/BookConstants')
 
 var _state = {
     books: [],
-    message:"",
-    editingBook: null,
-    continueEditing: false,
-    categories: [],
-    subcategories: []
+    message:{},
+    page: 1,
+    total: 0,
+    editingBook: {},
+    query:'',
+    ordering:''
 }
-
-var _categories = []
 
 var _props = {
-    url: '/api/books/',
-    categories_url: '/api/categories/',
-    subcategories_url: '/api/subcategories/'
+    url: '/api/books/'
 }
 
-
-var _search = function(query) {
+var _search = function() {
     $.ajax({
-        url: _props.url+'?search='+query,
+        url: _props.url+'?search='+_state.query+"&ordering="+_state.ordering,
         dataType: 'json',
         cache: false,
         success: function(data) {
-            _state.books = data;
+            _state.books = data.results;
+            _state.total = data.count;
+            
             BookStore.emitChange();
         },
         error: function(xhr, status, err) {
-            _state.message = err.toString();
+            _state.message.text = err.toString();
+            _state.message.color  = 'red'
             BookStore.emitChange();
         }
     });
@@ -47,12 +46,14 @@ var _deleteBook = function(bookId) {
         method: 'DELETE',
         cache: false,
         success: function(data) {
-            _state.message = "Successfully deleted book!"
+            _state.message.text = "Successfully deleted book!"
+            _state.message.color = 'green'
             _clearEditingBook();
             _reloadBooks();
         },
         error: function(xhr, status, err) {
             _state.message = err.toString();
+            _state.message.color = 'red'
             BookStore.emitChange();
         }
     });
@@ -68,12 +69,14 @@ var _saveBook = function(book) {
             data:book,
             cache: false,
             success: function(data) {
-                _state.message = "Successfully updated book!"
+                _state.message.text = "Successfully updated book!"
+                _state.message.color  = 'green'
                 _clearEditingBook();
                 _reloadBooks();
             },
             error: function(xhr, status, err) {
-                _state.message = err.toString()
+                _state.message.text = err.toString()
+                _state.message.color  = 'red'
                 BookStore.emitChange();
             }
         });
@@ -85,12 +88,14 @@ var _saveBook = function(book) {
             data:book,
             cache: false,
             success: function(data) {
-                _state.message = "Successfully added book!"
+                _state.message.text = "Successfully added book!"
+                _state.message.color  = 'green'
                 _clearEditingBook();
                 _reloadBooks();
             },
             error: function(xhr, status, err) {
-                _state.message = err.toString()
+                _state.message.text = err.toString()
+                _state.message.color  = 'red'
                 BookStore.emitChange();
             }
         });
@@ -98,15 +103,11 @@ var _saveBook = function(book) {
 };
 
 var _clearEditingBook = function() {
-    _state.editingBook = null;
-    _state.continueEditing = false;
-    _state.categories=_categories;
-    _state.subcategories=[];
+    _state.editingBook = {};
 };
 
 var _editBook = function(book) {
     _state.editingBook = book;
-    _state.continueEditing = false;
     BookStore.emitChange();
 };
 
@@ -131,28 +132,8 @@ var BookStore = $.extend({}, EventEmitter.prototype, {
     }
 });
 
-/*
-var BookStore = {
-    listeners: [],
-    getState: function() {
-        return _state;
-    },
-    emitChange: function() {
-        var i;
-        for(i=0;i<this.listeners.length;i++) {
-            this.listeners[i]();
-        }
-    },
-    addChangeListener: function(callback) {
-        this.listeners.push(callback);
-    },
-    removeChangeListener: function(callback) {
-        this.listeners.splice(this.listeners.indexOf(callback), 1);
-    }
-};
-*/
 
-AppDispatcher.register(function(action) {
+BookStore.dispatchToken = AppDispatcher.register(function(action) {
     switch(action.actionType) {
         case BookConstants.BOOK_EDIT:
             _editBook(action.book);
@@ -164,61 +145,28 @@ AppDispatcher.register(function(action) {
             _saveBook(action.book);
         break;
         case BookConstants.BOOK_SEARCH:
-            _search(action.query);
+            _state.query = action.query
+            _search();
         break;
         case BookConstants.BOOK_DELETE:
             _deleteBook(action.bookId);
         break;
-        case BookConstants.CATEGORY_CHANGE:
-            _load_subcategories(action.cat);
+        case BookConstants.BOOK_CHANGE:
+            _state.editingBook = action.book; 
+            BookStore.emitChange();
+        break;
+        case BookConstants.BOOK_SORT:
+            if(_state.ordering == action.field) {
+                _state.ordering = '-'+_state.ordering
+            } else {
+                _state.ordering = action.field;
+            }
+            _search();
         break;
     }
     return true;
 });
 
 
-var _load_categories = function() {
-    $.ajax({
-        url: _props.categories_url,
-        dataType: 'json',
-        cache: false,
-        success: function(data) {
-            _state.categories = data;
-            _categories = data;
-            BookStore.emitChange();
-        },
-        error: function(xhr, status, err) {
-            console.error(this.props.url, status, err.toString());
-            _state.message = err.toString();
-            BookStore.emitChange();
-        }
-    });
-};
-
-var _load_subcategories = function(cat) {
-    if(!cat) {
-        _state.subcategories = [];
-        BookStore.emitChange();
-        return ;
-    }
-    $.ajax({
-        url: _props.subcategories_url+'?category='+cat,
-        dataType: 'json',
-        cache: false,
-        success: function(data) {
-            _state.subcategories = data;
-            _state.continueEditing = true;
-            BookStore.emitChange();
-        },
-        error: function(xhr, status, err) {
-            console.error(this.props.url, status, err.toString());
-            _state.message = err.toString();
-            BookStore.emitChange();
-        }
-    });
-};
-
-
 module.exports.BookStore = BookStore;
 module.exports.reloadBooks = _reloadBooks;
-module.exports.loadCategories = _load_categories;

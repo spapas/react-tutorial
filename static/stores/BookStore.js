@@ -15,7 +15,7 @@ function getUrlParameter(sParam) {
             return sParameterName[1];
         }
     }
-} 
+}
 
 var _page_init = 1*getUrlParameter('page');
 if(!_page_init) _page_init = 1 ;
@@ -25,6 +25,7 @@ var _query_init = getUrlParameter('query');
 if(!_query_init) _query_init = ''
 
 var _state = {
+    loading: false,
     books: [],
     message:{},
     page: _page_init,
@@ -39,17 +40,23 @@ var _props = {
 }
 
 var _search = function() {
+    _state.loading = true;
+    BookStore.emitChange();
+    
     $.ajax({
         url: _props.url+'?search='+_state.query+"&ordering="+_state.ordering+"&page="+_state.page,
         dataType: 'json',
         cache: false,
         success: function(data) {
-            _state.books = data.results;
-            _state.total = data.count;
-            
-            BookStore.emitChange();
+            setTimeout(function() {
+                _state.books = data.results;
+                _state.total = data.count;
+                _state.loading = false;
+                BookStore.emitChange();
+            }, 400);
         },
         error: function(xhr, status, err) {
+            _state.loading = false;
             _state.message.text = err.toString();
             _state.message.color  = 'red'
             BookStore.emitChange();
@@ -138,11 +145,9 @@ var _cancelEditBook = function() {
 };
 
 var _update_href = function() {
-    console.log("UPD");
     var hash = 'page='+_state.page;
     hash += '&ordering='+_state.ordering;
     hash += '&query='+_state.query;
-    console.log(hash);
     $(location).attr('hash', hash);
 }
 
@@ -175,6 +180,7 @@ BookStore.dispatchToken = AppDispatcher.register(function(action) {
         break;
         case BookConstants.BOOK_SEARCH:
             _state.query = action.query
+            _state.page = 1;
             _update_href();
             _search();
         break;
@@ -182,15 +188,16 @@ BookStore.dispatchToken = AppDispatcher.register(function(action) {
             _deleteBook(action.bookId);
         break;
         case BookConstants.BOOK_CHANGE:
-            _state.editingBook = action.book; 
+            _state.editingBook = action.book;
             BookStore.emitChange();
         break;
         case BookConstants.BOOK_PAGE:
-            _state.page = action.page; 
+            _state.page = action.page;
             _update_href();
             _search();
         break;
         case BookConstants.BOOK_SORT:
+            _state.page = 1;
             if(_state.ordering == action.field) {
                 _state.ordering = '-'+_state.ordering
             } else {

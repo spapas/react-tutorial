@@ -1,13 +1,15 @@
 var React = require('react');
 var BookActions = require('../actions/BookActions').BookActions;
-var CategoryActions = require('../actions/CategoryActions').CategoryActions;
 var DropDown = require('./DropDown.react.js').DropDown;
 var StatPanel = require('./StatPanel.react.js').StatPanel;
 var DatePicker = require('./DatePicker.react.js').DatePicker;
 var ButtonPanel = require('./ButtonPanel.react.js').ButtonPanel;
+var AuthorPanel = require('./AuthorPanel.react.js').AuthorPanel;
 var BookStore = require('../stores/BookStore').BookStore;
 var CategoryStore = require('../stores/CategoryStore').CategoryStore;
+var AuthorStore = require('../stores/AuthorStore').AuthorStore;
 var loadCategories = require('../stores/CategoryStore').loadCategories;
+var loadAuthors = require('../stores/AuthorStore').loadAuthors;
 
 
 var BookForm = React.createClass({
@@ -19,10 +21,12 @@ var BookForm = React.createClass({
             <form onSubmit={this.onSubmit}>
                 <div className='row'>
                     <div className='one-half column'>
-                        <label forHtml='title'>Title</label><input ref='title' name='title' type='text' value={this.props.book.title} onChange={this.onTitleChange} />
+                        <label forHtml='title'>Title</label>
+                        <input ref='title' name='title' type='text' value={this.props.book.title} onChange={this.onTitleChange} />
                     </div>
                     <div className='one-half column'>
-                        <label forHtml='date'>Publish date</label><DatePicker ref='date' onChange={this.onDateChange} value={this.props.book.publish_date} />
+                        <label forHtml='date'>Publish date</label>
+                        <DatePicker ref='date' onChange={this.onDateChange} value={this.props.book.publish_date} />
                     </div>
                 </div>
                 <div className='row'>
@@ -31,6 +35,7 @@ var BookForm = React.createClass({
                         <DropDown options={this.state.categories} dropDownValueChanged={this.onCategoryChanged} value={this.props.book.category} />
                         <DropDown options={this.state.subcategories} dropDownValueChanged={this.onSubCategoryChanged} value={this.props.book.subcategory} />
                     </div>
+                    <AuthorPanel authors={this.state.authors} author={this.props.book.author} onAuthorChanged={this.onAuthorChanged} showDialog={this.state.showDialog} />
                 </div>
                 
                 <ButtonPanel book={this.props.book} message={this.props.message} />
@@ -50,26 +55,35 @@ var BookForm = React.createClass({
         this.props.book.publish_date = date;
         BookActions.change_book(this.props.book);
     },
-    
     onCategoryChanged: function(cat) {
         this.props.book.category = cat;
+        this.props.book.subcategory = '';
         BookActions.change_book(this.props.book);
-        CategoryActions.change_category(cat)
     },
     onSubCategoryChanged: function(cat) {
         this.props.book.subcategory = cat;
         BookActions.change_book(this.props.book);
-        CategoryActions.change_subcategory(cat)
     },
-    _onChange: function() {
+    onAuthorChanged: function(author) {
+        this.props.book.author = author;
+        BookActions.change_book(this.props.book);
+    },
+    _onChangeCategories: function() {
         this.setState(CategoryStore.getState());
     },
+    _onChangeAuthors: function() {
+        console.log(AuthorStore.getState());
+        this.setState(AuthorStore.getState());
+    },
     componentWillUnmount: function() {
-        CategoryStore.removeChangeListener(this._onChange);
+        CategoryStore.removeChangeListener(this._onChangeCategories);
+        AuthorStore.removeChangeListener(this._onChangeAuthors);
     },
     componentDidMount: function() {
-        CategoryStore.addChangeListener(this._onChange);
+        CategoryStore.addChangeListener(this._onChangeCategories);
+        AuthorStore.addChangeListener(this._onChangeAuthors);
         loadCategories();
+        loadAuthors();
     }
 });
 

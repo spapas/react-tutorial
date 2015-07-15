@@ -23,6 +23,18 @@ class Book(models.Model):
     title = models.CharField(max_length=50)
     publish_date = models.DateField(blank=True, null=True)
     subcategory = models.ForeignKey('SubCategory', blank=True, null=True)
+    author = models.ForeignKey('Author', blank=True, null=True)
     
     def __unicode__(self):
         return self.title
+        
+        
+class Author(models.Model):
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    
+    def get_number_of_books(self):
+        return Book.objects.filter(author=self).count()
+    
+    def __unicode__(self):
+        return self.first_name + ' ' + self.last_name

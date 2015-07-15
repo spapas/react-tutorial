@@ -2,8 +2,8 @@ from django.shortcuts import render
 from django.views.generic import TemplateView
 from rest_framework import viewsets, filters
 from rest_framework.pagination import PageNumberPagination
-from books.models import Book, Category, SubCategory
-from books.serializers import BookSerializer, CategorySerializer, SubCategorySerializer
+from books.models import Book, Category, SubCategory, Author
+from books.serializers import BookSerializer, CategorySerializer, SubCategorySerializer, AuthorSerializer
 
 class HomeTemplateView(TemplateView, ):
     template_name = 'home.html'
@@ -15,9 +15,9 @@ class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     filter_backends = (filters.SearchFilter, filters.OrderingFilter)
-    search_fields = ('title', 'subcategory__category__name', 'subcategory__name')
+    search_fields = ('title', 'subcategory__category__name', 'subcategory__name', 'author__last_name',)
     pagination_class = SmallPageNumberPagination
-    ordering_fields = ('subcategory__name', 'id', 'title', 'publish_date', )
+    ordering_fields = ('subcategory__name', 'id', 'title', 'publish_date', 'author__last_name', )
     ordering = ('title',)
 
 
@@ -28,12 +28,19 @@ class CategoryViewSet(viewsets.ModelViewSet):
     search_fields = ('name', )
 
 
+class AuthorViewSet(viewsets.ModelViewSet):
+    queryset = Author.objects.all()
+    serializer_class = AuthorSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('last_name', 'first_name', )
+
+
 class SubCategoryViewSet(viewsets.ModelViewSet):
     queryset = SubCategory.objects.all()
     serializer_class = SubCategorySerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name, category__name', )
-    
+
     def get_queryset(self):
         queryset = SubCategory.objects.all()
         category = self.request.query_params.get('category', None)

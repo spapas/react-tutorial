@@ -33,7 +33,7 @@ var SearchPanel = React.createClass({
         });
         this.promise = setTimeout(function () {
             BookActions.search(query);
-        }.bind(this), 200);
+        }.bind(this), 400);
     },
     onClearSearch: function() {
         this.setState({

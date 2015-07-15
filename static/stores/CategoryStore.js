@@ -14,9 +14,10 @@ var _props = {
     subcategories_url: '/api/subcategories/'
 }
 
+var _current_cat = ''
+
 
 var _load_categories = function() {
-    console.log("LOAD")
     $.ajax({
         url: _props.categories_url,
         dataType: 'json',
@@ -75,12 +76,15 @@ var CategoryStore = $.extend({}, EventEmitter.prototype, {
 
 CategoryStore.dispatchToken = AppDispatcher.register(function(action) {
     switch(action.actionType) {
-        case BookConstants.CATEGORY_CHANGE:
-            _load_subcategories(action.cat);
-        break;
-        case BookConstants.SUBCATEGORY_CHANGE:
+        case BookConstants.BOOK_EDIT:
+        case BookConstants.BOOK_CHANGE:
+            if(action.book.category!=_current_cat) {
+                _load_subcategories(action.book.category);
+                _current_cat=action.book.category
+            }
         break;
         case BookConstants.BOOK_EDIT_CANCEL:
+            _state.subcategories = [];
             CategoryStore.emitChange();
         break;
     }

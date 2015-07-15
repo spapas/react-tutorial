@@ -16,9 +16,15 @@ var BookPanel = React.createClass({
         return(
             <div className="row">
                 <div className="one-half column">
-                    <SearchPanel query={this.state.query} ></SearchPanel>
-                    <BookTable books={this.state.books} ordering={this.state.ordering} />
-                    <PagingPanel page_size='5' total={this.state.total} page={this.state.page} />
+                    {
+                        this.state.loading?
+                        <div class='loading' >Loading...</div>:
+                        <div>
+                            <SearchPanel query={this.state.query} ></SearchPanel>
+                            <BookTable books={this.state.books} ordering={this.state.ordering} />
+                            <PagingPanel page_size='5' total={this.state.total} page={this.state.page} />
+                        </div>
+                    }
                 </div>
                 <div className="one-half column">
                     <BookForm
@@ -37,8 +43,8 @@ var BookPanel = React.createClass({
         BookStore.removeChangeListener(this._onChange);
     },
     componentDidMount: function() {
-        reloadBooks();
         BookStore.addChangeListener(this._onChange);
+        reloadBooks();
     }
 });
 

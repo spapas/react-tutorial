@@ -16,6 +16,7 @@ var BookTable = React.createClass({
                         <th><a href='#' onClick={this.onClick.bind(this, 'title')}>{this.showOrdering('title')} Title</a></th>
                         <th><a href='#' onClick={this.onClick.bind(this, 'subcategory__name')}>{this.showOrdering('subcategory__name')} Category</a></th>
                         <th><a href='#' onClick={this.onClick.bind(this, 'publish_date')}>{this.showOrdering('publish_date')} Publish date</a></th>
+                        <th><a href='#' onClick={this.onClick.bind(this, 'author__last_name')}>{this.showOrdering('author__last_name')} Author</a></th>
                         <th>Edit</th>
                     </tr>
                 </thead>

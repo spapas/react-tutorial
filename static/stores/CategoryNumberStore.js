@@ -51,20 +51,20 @@ var _get_stats = function() {
 }
 
 CategoryNumberStore.dispatchToken = AppDispatcher.register(function(action) {
-
     switch(action.actionType) {
-        case BookConstants.CATEGORY_CHANGE:
-            _category = action.cat;
+        case BookConstants.BOOK_EDIT:
+            _category = action.book.category;
+            _subcategory = action.book.subcategory;
             _get_stats();
             CategoryNumberStore.emitChange();
         break;
-        case BookConstants.SUBCATEGORY_CHANGE:
-            _subcategory = action.cat;
+        case BookConstants.BOOK_CHANGE:
+            _category = action.book.category;
+            _subcategory = action.book.subcategory;
             _get_stats();
             CategoryNumberStore.emitChange();
         break;
         case BookConstants.COUNT_STATS:
-            AppDispatcher.waitFor([CategoryStore.dispatchToken]);
             _get_stats();
             CategoryNumberStore.emitChange();
         break;

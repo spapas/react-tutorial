@@ -4,8 +4,13 @@ var BookActions = require('../actions/BookActions').BookActions;
 var SearchPanel = React.createClass({
     getInitialState: function() {
         return {
-            search: '',
+            search: this.props.query,
         }
+    },
+    componentWillReceiveProps: function(nextProps) {
+      this.setState({
+            search: nextProps.query
+      });
     },
     render: function() {
         return (

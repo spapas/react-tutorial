@@ -3,14 +3,35 @@ var EventEmitter = require('events').EventEmitter;
 var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
 var BookConstants = require('../constants/BookConstants')
 
+
+
+function getUrlParameter(sParam) {
+    var sPageURL = $(location).attr('hash');
+    sPageURL = sPageURL.substr(1)
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++)  {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] == sParam)  {
+            return sParameterName[1];
+        }
+    }
+} 
+
+var _page_init = 1*getUrlParameter('page');
+if(!_page_init) _page_init = 1 ;
+var _ordering_init = getUrlParameter('ordering');
+if(!_ordering_init) _ordering_init = '' ;
+var _query_init = getUrlParameter('query');
+if(!_query_init) _query_init = ''
+
 var _state = {
     books: [],
     message:{},
-    page: 1,
+    page: _page_init,
     total: 0,
     editingBook: {},
-    query:'',
-    ordering:''
+    query: _query_init,
+    ordering: _ordering_init
 }
 
 var _props = {
@@ -116,6 +137,14 @@ var _cancelEditBook = function() {
     BookStore.emitChange();
 };
 
+var _update_href = function() {
+    console.log("UPD");
+    var hash = 'page='+_state.page;
+    hash += '&ordering='+_state.ordering;
+    hash += '&query='+_state.query;
+    console.log(hash);
+    $(location).attr('hash', hash);
+}
 
 var BookStore = $.extend({}, EventEmitter.prototype, {
     getState: function() {
@@ -146,6 +175,7 @@ BookStore.dispatchToken = AppDispatcher.register(function(action) {
         break;
         case BookConstants.BOOK_SEARCH:
             _state.query = action.query
+            _update_href();
             _search();
         break;
         case BookConstants.BOOK_DELETE:
@@ -157,6 +187,7 @@ BookStore.dispatchToken = AppDispatcher.register(function(action) {
         break;
         case BookConstants.BOOK_PAGE:
             _state.page = action.page; 
+            _update_href();
             _search();
         break;
         case BookConstants.BOOK_SORT:
@@ -165,6 +196,7 @@ BookStore.dispatchToken = AppDispatcher.register(function(action) {
             } else {
                 _state.ordering = action.field;
             }
+            _update_href();
             _search();
         break;
     }

@@ -23,7 +23,8 @@ var BookTable = React.createClass({
             </table>
         );
     },
-    onClick: function(v) {
+    onClick: function(v, e) {
+        e.preventDefault();
         BookActions.sort_books(v);
     },
     showOrdering: function(v) {

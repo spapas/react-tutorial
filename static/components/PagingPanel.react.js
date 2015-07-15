@@ -6,7 +6,7 @@ var PagingPanel = React.createClass({
         return(
             <div className="row">
                 {this.props.page==1?'':<button onClick={this.onPreviousPageClick}>&lt;</button>}
-                Page {this.props.page} of {this.getTotalPages()}
+                &nbsp; Page {this.props.page} of {this.getTotalPages()} &nbsp; 
                 {this.props.page==this.getTotalPages()?'':<button onClick={this.onNextPageClick} >&gt;</button>}
             </div>
         );

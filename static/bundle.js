@@ -29716,11 +29716,11 @@ var CategoryActions = {
             cat: cat
         });
     },
-    count_stats: function(cat, subcat) {
+    count_stats: function() {
         AppDispatcher.dispatch({
             actionType: BookConstants.COUNT_STATS
         });
-    },
+    }
 };
 
 module.exports.CategoryActions = CategoryActions;
@@ -29822,15 +29822,14 @@ var BookPanel = React.createClass({displayName: "BookPanel",
         return(
             React.createElement("div", {className: "row"}, 
                 React.createElement("div", {className: "one-half column"}, 
-                    React.createElement(SearchPanel, null), 
+                    React.createElement(SearchPanel, {query: this.state.query}), 
                     React.createElement(BookTable, {books: this.state.books, ordering: this.state.ordering}), 
                     React.createElement(PagingPanel, {page_size: "5", total: this.state.total, page: this.state.page})
                 ), 
                 React.createElement("div", {className: "one-half column"}, 
                     React.createElement(BookForm, {
                         book: this.state.editingBook, 
-                        message: this.state.message, 
-                        continueEditing: this.state.continueEditing}
+                        message: this.state.message}
                     )
                 ), 
                 React.createElement("br", null)
@@ -29877,7 +29876,8 @@ var BookTable = React.createClass({displayName: "BookTable",
             )
         );
     },
-    onClick: function(v) {
+    onClick: function(v, e) {
+        e.preventDefault();
         BookActions.sort_books(v);
     },
     showOrdering: function(v) {
@@ -30005,7 +30005,7 @@ var PagingPanel = React.createClass({displayName: "PagingPanel",
         return(
             React.createElement("div", {className: "row"}, 
                 this.props.page==1?'':React.createElement("button", {onClick: this.onPreviousPageClick}, "<"), 
-                "Page ", this.props.page, " of ", this.getTotalPages(), 
+                "  Page ", this.props.page, " of ", this.getTotalPages(), "  ",  
                 this.props.page==this.getTotalPages()?'':React.createElement("button", {onClick: this.onNextPageClick}, ">")
             )
         );
@@ -30033,8 +30033,13 @@ var BookActions = require('../actions/BookActions').BookActions;
 var SearchPanel = React.createClass({displayName: "SearchPanel",
     getInitialState: function() {
         return {
-            search: '',
+            search: this.props.query,
         }
+    },
+    componentWillReceiveProps: function(nextProps) {
+      this.setState({
+            search: nextProps.query
+      });
     },
     render: function() {
         return (
@@ -30129,14 +30134,35 @@ var EventEmitter = require('events').EventEmitter;
 var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
 var BookConstants = require('../constants/BookConstants')
 
+
+
+function getUrlParameter(sParam) {
+    var sPageURL = $(location).attr('hash');
+    sPageURL = sPageURL.substr(1)
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++)  {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] == sParam)  {
+            return sParameterName[1];
+        }
+    }
+} 
+
+var _page_init = 1*getUrlParameter('page');
+if(!_page_init) _page_init = 1 ;
+var _ordering_init = getUrlParameter('ordering');
+if(!_ordering_init) _ordering_init = '' ;
+var _query_init = getUrlParameter('query');
+if(!_query_init) _query_init = ''
+
 var _state = {
     books: [],
     message:{},
-    page: 1,
+    page: _page_init,
     total: 0,
     editingBook: {},
-    query:'',
-    ordering:''
+    query: _query_init,
+    ordering: _ordering_init
 }
 
 var _props = {
@@ -30242,6 +30268,14 @@ var _cancelEditBook = function() {
     BookStore.emitChange();
 };
 
+var _update_href = function() {
+    console.log("UPD");
+    var hash = 'page='+_state.page;
+    hash += '&ordering='+_state.ordering;
+    hash += '&query='+_state.query;
+    console.log(hash);
+    $(location).attr('hash', hash);
+}
 
 var BookStore = $.extend({}, EventEmitter.prototype, {
     getState: function() {
@@ -30272,6 +30306,7 @@ BookStore.dispatchToken = AppDispatcher.register(function(action) {
         break;
         case BookConstants.BOOK_SEARCH:
             _state.query = action.query
+            _update_href();
             _search();
         break;
         case BookConstants.BOOK_DELETE:
@@ -30283,6 +30318,7 @@ BookStore.dispatchToken = AppDispatcher.register(function(action) {
         break;
         case BookConstants.BOOK_PAGE:
             _state.page = action.page; 
+            _update_href();
             _search();
         break;
         case BookConstants.BOOK_SORT:
@@ -30291,6 +30327,7 @@ BookStore.dispatchToken = AppDispatcher.register(function(action) {
             } else {
                 _state.ordering = action.field;
             }
+            _update_href();
             _search();
         break;
     }
@@ -30397,8 +30434,6 @@ var _state = {
     subcategories: []
 }
 
-var _categories = []
-
 var _props = {
     categories_url: '/api/categories/',
     subcategories_url: '/api/subcategories/'
@@ -30413,7 +30448,6 @@ var _load_categories = function() {
         cache: false,
         success: function(data) {
             _state.categories = data;
-            _categories = data;
             CategoryStore.emitChange();
         },
         error: function(xhr, status, err) {
@@ -30486,6 +30520,6 @@ module.exports.loadCategories = _load_categories;
 var React = require('react');
 var BookPanel = require('./components/BookPanel.react').BookPanel;
 
-React.render(React.createElement(BookPanel, {url: "/api/books/"}), document.getElementById('content'));
+React.render(React.createElement(BookPanel, null), document.getElementById('content'));
 
 },{"./components/BookPanel.react":165,"react":161}]},{},[179]);

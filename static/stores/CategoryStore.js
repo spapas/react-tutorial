@@ -9,8 +9,6 @@ var _state = {
     subcategories: []
 }
 
-var _categories = []
-
 var _props = {
     categories_url: '/api/categories/',
     subcategories_url: '/api/subcategories/'
@@ -25,7 +23,6 @@ var _load_categories = function() {
         cache: false,
         success: function(data) {
             _state.categories = data;
-            _categories = data;
             CategoryStore.emitChange();
         },
         error: function(xhr, status, err) {

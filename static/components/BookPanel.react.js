@@ -16,7 +16,7 @@ var BookPanel = React.createClass({
         return(
             <div className="row">
                 <div className="one-half column">
-                    <SearchPanel></SearchPanel>
+                    <SearchPanel query={this.state.query} ></SearchPanel>
                     <BookTable books={this.state.books} ordering={this.state.ordering} />
                     <PagingPanel page_size='5' total={this.state.total} page={this.state.page} />
                 </div>
@@ -24,7 +24,6 @@ var BookPanel = React.createClass({
                     <BookForm
                         book={this.state.editingBook}
                         message={this.state.message}
-                        continueEditing={this.state.continueEditing}
                     />
                 </div>
                 <br />

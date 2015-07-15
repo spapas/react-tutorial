@@ -14,11 +14,11 @@ var CategoryActions = {
             cat: cat
         });
     },
-    count_stats: function(cat, subcat) {
+    count_stats: function() {
         AppDispatcher.dispatch({
             actionType: BookConstants.COUNT_STATS
         });
-    },
+    }
 };
 
 module.exports.CategoryActions = CategoryActions;

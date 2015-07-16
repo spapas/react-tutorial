@@ -2,6 +2,7 @@ var $ = require('jquery');
 var EventEmitter = require('events').EventEmitter;
 var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
 var BookConstants = require('../constants/BookConstants');
+var MessageActions = require('../actions/MessageActions').MessageActions;
 
 var _state = {
     authors: [],
@@ -27,9 +28,8 @@ var _load_authors = function() {
             AuthorStore.emitChange();
         },
         error: function(xhr, status, err) {
-            console.error(this.props.url, status, err.toString());
-            _state.message = err.toString();
-            AuthorStore.emitChange();
+            MessageActions.add_message_error(err.toString());
+            BookStore.emitChange();
         }
     });
 };
@@ -41,11 +41,13 @@ var _deleteAuthor = function(authorId) {
         method: 'DELETE',
         cache: false,
         success: function(data) {
-            console.log("Author delete ok");
+            MessageActions.add_message_ok("Author delete ok");
+            BookStore.emitChange();
             _load_authors();
         },
         error: function(xhr, status, err) {
-            console.log("Author delete err");
+            MessageActions.add_message_error(err.toString());
+            BookStore.emitChange();
         }
     });
 };
@@ -58,12 +60,13 @@ var _addAuthor = function(author) {
         data:author,
         cache: false,
         success: function(data) {
-            console.log("Author add ok");
+            MessageActions.add_message_ok("Author add  ok");
             _state.showDialog = false;
             _load_authors();
         },
         error: function(xhr, status, err) {
-            console.log("Author add err");
+            MessageActions.add_message_error(err.toString());
+            BookStore.emitChange();
         }
     });
 

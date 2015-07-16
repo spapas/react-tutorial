@@ -15,7 +15,7 @@ var _props = {
 }
 
 var _current_cat = ''
-
+var _subcat_cache = []
 
 var _load_categories = function() {
     $.ajax({
@@ -41,12 +41,21 @@ var _load_subcategories = function(cat) {
         CategoryStore.emitChange();
         return ;
     }
+    if(_subcat_cache[cat]) {
+        _state.subcategories = _subcat_cache[cat] ;
+        CategoryStore.emitChange();
+        // The action in a different call
+        setTimeout(function() {
+            CategoryActions.count_stats();
+        }, 0);
+    }
     $.ajax({
         url: _props.subcategories_url+'?category='+cat,
         dataType: 'json',
         cache: false,
         success: function(data) {
             _state.subcategories = data;
+            _subcat_cache[cat] = data;
             CategoryStore.emitChange();
             CategoryActions.count_stats()
         },
@@ -78,10 +87,10 @@ CategoryStore.dispatchToken = AppDispatcher.register(function(action) {
     switch(action.actionType) {
         case BookConstants.BOOK_EDIT:
         case BookConstants.BOOK_CHANGE:
-            if(action.book.category!=_current_cat) {
+            //if(action.book.category!=_current_cat) {
                 _load_subcategories(action.book.category);
-                _current_cat=action.book.category
-            }
+              //  _current_cat=action.book.category
+            //}
         break;
         case BookConstants.BOOK_EDIT_CANCEL:
             _state.subcategories = [];

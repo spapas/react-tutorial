@@ -2,6 +2,7 @@ var React = require('react');
 var BookActions = require('../actions/BookActions').BookActions;
 var DropDown = require('./DropDown.react.js').DropDown;
 var StatPanel = require('./StatPanel.react.js').StatPanel;
+var MessagePanel = require('./MessagePanel.react.js').MessagePanel;
 var DatePicker = require('./DatePicker.react.js').DatePicker;
 var ButtonPanel = require('./ButtonPanel.react.js').ButtonPanel;
 var AuthorPanel = require('./AuthorPanel.react.js').AuthorPanel;
@@ -38,7 +39,8 @@ var BookForm = React.createClass({
                     <AuthorPanel authors={this.state.authors} author={this.props.book.author} onAuthorChanged={this.onAuthorChanged} showDialog={this.state.showDialog} />
                 </div>
                 
-                <ButtonPanel book={this.props.book} message={this.props.message} />
+                <ButtonPanel book={this.props.book}  />
+                <MessagePanel />
                 <StatPanel  />
             </form>
         );
@@ -72,7 +74,6 @@ var BookForm = React.createClass({
         this.setState(CategoryStore.getState());
     },
     _onChangeAuthors: function() {
-        console.log(AuthorStore.getState());
         this.setState(AuthorStore.getState());
     },
     componentWillUnmount: function() {

@@ -2,7 +2,7 @@ var $ = require('jquery');
 var EventEmitter = require('events').EventEmitter;
 var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
 var BookConstants = require('../constants/BookConstants')
-
+var MessageActions = require('../actions/MessageActions').MessageActions;
 
 
 function getUrlParameter(sParam) {
@@ -48,6 +48,7 @@ var _search = function() {
         dataType: 'json',
         cache: false,
         success: function(data) {
+            // Simulate a small delay in server response
             setTimeout(function() {
                 _state.books = data.results;
                 _state.total = data.count;
@@ -57,8 +58,7 @@ var _search = function() {
         },
         error: function(xhr, status, err) {
             _state.loading = false;
-            _state.message.text = err.toString();
-            _state.message.color  = 'red'
+            MessageActions.add_message_error(err.toString());
             BookStore.emitChange();
         }
     });
@@ -74,14 +74,12 @@ var _deleteBook = function(bookId) {
         method: 'DELETE',
         cache: false,
         success: function(data) {
-            _state.message.text = "Successfully deleted book!"
-            _state.message.color = 'green'
+            MessageActions.add_message_ok("Successfully deleted book!");
             _clearEditingBook();
             _reloadBooks();
         },
         error: function(xhr, status, err) {
-            _state.message = err.toString();
-            _state.message.color = 'red'
+            MessageActions.add_message_error(err.toString());
             BookStore.emitChange();
         }
     });
@@ -97,14 +95,12 @@ var _saveBook = function(book) {
             data:book,
             cache: false,
             success: function(data) {
-                _state.message.text = "Successfully updated book!"
-                _state.message.color  = 'green'
+                MessageActions.add_message_ok("Successfully updated book!");
                 _clearEditingBook();
                 _reloadBooks();
             },
             error: function(xhr, status, err) {
-                _state.message.text = err.toString()
-                _state.message.color  = 'red'
+                MessageActions.add_message_error(err.toString());
                 BookStore.emitChange();
             }
         });
@@ -116,14 +112,12 @@ var _saveBook = function(book) {
             data:book,
             cache: false,
             success: function(data) {
-                _state.message.text = "Successfully added book!"
-                _state.message.color  = 'green'
+                MessageActions.add_message_ok("Successfully added book!");
                 _clearEditingBook();
                 _reloadBooks();
             },
             error: function(xhr, status, err) {
-                _state.message.text = err.toString()
-                _state.message.color  = 'red'
+                MessageActions.add_message_error(err.toString());
                 BookStore.emitChange();
             }
         });

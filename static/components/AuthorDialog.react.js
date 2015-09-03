@@ -20,12 +20,6 @@ var AuthorDialog = React.createClass({
             );
         }
     },
-    componentDidMount: function() {
-        
-    },
-    componentWillUnmount: function() {
-    
-    },
     onCancel: function(e) {
         e.preventDefault();
         AuthorActions.hide_add_author();

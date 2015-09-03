@@ -23,6 +23,16 @@ var AuthorActions = {
             actionType: BookConstants.AUTHOR_DELETE,
             authorId: id
         });
+    },
+    delete_author_ok: function(id) {
+        AppDispatcher.dispatch({
+            actionType: BookConstants.AUTHOR_DELETE_OK
+        });
+    },
+    delete_author_ok: function(id) {
+        AppDispatcher.dispatch({
+            actionType: BookConstants.AUTHOR_DELETE_OK
+        });
     }
 };
 

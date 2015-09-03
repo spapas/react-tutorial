@@ -190,6 +190,10 @@ BookStore.dispatchToken = AppDispatcher.register(function(action) {
             _update_href();
             _search();
         break;
+        case BookConstants.AUTHOR_DELETE_OK:
+            console.log("AUTTHOR DEL OK");
+            _search();
+        break;
         case BookConstants.BOOK_SORT:
             _state.page = 1;
             if(_state.ordering == action.field) {

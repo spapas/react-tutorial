@@ -3,6 +3,7 @@ var EventEmitter = require('events').EventEmitter;
 var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
 var BookConstants = require('../constants/BookConstants');
 var MessageActions = require('../actions/MessageActions').MessageActions;
+var AuthorActions = require('../actions/AuthorActions').AuthorActions;
 
 var _state = {
     authors: [],
@@ -29,7 +30,6 @@ var _load_authors = function() {
         },
         error: function(xhr, status, err) {
             MessageActions.add_message_error(err.toString());
-            BookStore.emitChange();
         }
     });
 };
@@ -41,13 +41,12 @@ var _deleteAuthor = function(authorId) {
         method: 'DELETE',
         cache: false,
         success: function(data) {
-            MessageActions.add_message_ok("Author delete ok");
-            BookStore.emitChange();
             _load_authors();
+            MessageActions.add_message_ok("Author delete ok");
+            AuthorActions.delete_author_ok();
         },
         error: function(xhr, status, err) {
             MessageActions.add_message_error(err.toString());
-            BookStore.emitChange();
         }
     });
 };
@@ -66,7 +65,6 @@ var _addAuthor = function(author) {
         },
         error: function(xhr, status, err) {
             MessageActions.add_message_error(err.toString());
-            BookStore.emitChange();
         }
     });
 

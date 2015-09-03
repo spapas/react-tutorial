@@ -23,7 +23,7 @@ class Book(models.Model):
     title = models.CharField(max_length=50)
     publish_date = models.DateField(blank=True, null=True)
     subcategory = models.ForeignKey('SubCategory', blank=True, null=True)
-    author = models.ForeignKey('Author', blank=True, null=True)
+    author = models.ForeignKey('Author', blank=True, null=True, on_delete=models.SET_NULL)
     
     def __unicode__(self):
         return self.title

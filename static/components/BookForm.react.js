@@ -6,7 +6,6 @@ var MessagePanel = require('./MessagePanel.react.js').MessagePanel;
 var DatePicker = require('./DatePicker.react.js').DatePicker;
 var ButtonPanel = require('./ButtonPanel.react.js').ButtonPanel;
 var AuthorPanel = require('./AuthorPanel.react.js').AuthorPanel;
-var BookStore = require('../stores/BookStore').BookStore;
 var CategoryStore = require('../stores/CategoryStore').CategoryStore;
 var AuthorStore = require('../stores/AuthorStore').AuthorStore;
 var loadCategories = require('../stores/CategoryStore').loadCategories;

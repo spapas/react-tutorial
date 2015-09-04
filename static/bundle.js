@@ -29956,7 +29956,7 @@ var BookForm = React.createClass({displayName: "BookForm",
 
 module.exports.BookForm = BookForm;
 
-},{"../actions/BookActions":163,"../stores/AuthorStore":181,"../stores/CategoryStore":184,"./AuthorPanel.react.js":167,"./ButtonPanel.react.js":172,"./DatePicker.react.js":173,"./DropDown.react.js":174,"./MessagePanel.react.js":175,"./StatPanel.react.js":178,"react":161}],169:[function(require,module,exports){
+},{"../actions/BookActions":163,"../stores/AuthorStore":181,"../stores/CategoryStore":183,"./AuthorPanel.react.js":167,"./ButtonPanel.react.js":172,"./DatePicker.react.js":173,"./DropDown.react.js":174,"./MessagePanel.react.js":175,"./StatPanel.react.js":178,"react":161}],169:[function(require,module,exports){
 var React = require('react');
 var BookStore = require('../stores/BookStore').BookStore;
 var BookActions = require('../actions/BookActions').BookActions;
@@ -30185,7 +30185,7 @@ var MessagePanel = React.createClass({displayName: "MessagePanel",
 
 module.exports.MessagePanel = MessagePanel;
 
-},{"../stores/MessageStore":185,"react":161}],176:[function(require,module,exports){
+},{"../stores/MessageStore":184,"react":161}],176:[function(require,module,exports){
 var React = require('react');
 var BookActions = require('../actions/BookActions').BookActions;
 
@@ -30265,38 +30265,56 @@ module.exports.SearchPanel = SearchPanel;
 
 },{"../actions/BookActions":163,"react":161}],178:[function(require,module,exports){
 var React = require('react');
-var CategoryNumberStore = require('../stores/CategoryNumberStore').CategoryNumberStore;
+var BookStore = require('../stores/BookStore').BookStore;
+var AuthorStore = require('../stores/AuthorStore').AuthorStore;
 
 var StatPanel = React.createClass({displayName: "StatPanel",
     getInitialState: function() {
         return {};
     },
     render: function() {
+        var book_len = '-';
+        var author_len = '-';
+        if(this.state.books) {
+            book_len = this.state.books.length
+        }
+        if(this.state.authors) {
+            author_len = this.state.authors.length
+        }
         return(
             React.createElement("div", {className: "row"}, 
                 React.createElement("div", {className: "one-half column"}, 
-                    "Books in category: ", this.state.category_books
+                    "Books number: ", book_len
                 ), 
                 React.createElement("div", {className: "one-half column"}, 
-                    "Books in subcategory: ", this.state.subcategory_books
+                    "Authors number: ", author_len
                 ), 
                 React.createElement("br", null)
             )
         );
     },
-    _onChange: function() {
-        this.setState(CategoryNumberStore.getState());
+    _onBookChange: function() {
+        this.setState({
+            books:BookStore.getState().books
+        });
+    },
+    _onAuthorChange: function() {
+        this.setState({
+            authors: AuthorStore.getState().authors
+        });
     },
     componentWillUnmount: function() {
-        CategoryNumberStore.removeChangeListener(this._onChange);
+        AuthorStore.removeChangeListener(this._onAuthorChange);
+        BookStore.removeChangeListener(this._onBookChange);
     },
     componentDidMount: function() {
-        CategoryNumberStore.addChangeListener(this._onChange);
+        AuthorStore.addChangeListener(this._onAuthorChange);
+        BookStore.addChangeListener(this._onBookChange);
     }
 });
 
 module.exports.StatPanel = StatPanel ;
-},{"../stores/CategoryNumberStore":183,"react":161}],179:[function(require,module,exports){
+},{"../stores/AuthorStore":181,"../stores/BookStore":182,"react":161}],179:[function(require,module,exports){
 
 module.exports = {
       BOOK_CHANGE: 'BOOK_CHANGE',
@@ -30654,90 +30672,6 @@ module.exports.reloadBooks = _reloadBooks;
 var $ = require('jquery');
 var EventEmitter = require('events').EventEmitter;
 var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
-var BookConstants = require('../constants/BookConstants')
-var CategoryStore = require('./CategoryStore').CategoryStore;
-
-
-var _state = {
-    category_books: "-",
-    subcategory_books: "-"
-}
-
-_category = undefined;
-_subcategory = undefined;
-
-var CategoryNumberStore = $.extend({}, EventEmitter.prototype, {
-    getState: function() {
-        return _state;
-    },
-    emitChange: function() {
-        this.emit('change');
-    },
-    addChangeListener: function(callback) {
-        this.on('change', callback);
-    },
-    removeChangeListener: function(callback) {
-        this.removeListener('change', callback);
-    }
-});
-
-var _get_stats = function() {
-    var i;
-    var categoryState = CategoryStore.getState();
-
-    _state = {
-        category_books: "-",
-        subcategory_books: "-"
-    }
-
-    for(i=0;i<categoryState.categories.length;i++) {
-        if(categoryState.categories[i].id == _category) {
-            _state.category_books = categoryState.categories[i].number_of_books;
-        }
-    }
-
-    for(i=0;i<categoryState.subcategories.length;i++) {
-        if(categoryState.subcategories[i].id == _subcategory ) {
-            _state.subcategory_books = categoryState.subcategories[i].number_of_books;
-        }
-    }
-}
-
-CategoryNumberStore.dispatchToken = AppDispatcher.register(function(action) {
-    switch(action.actionType) {
-        case BookConstants.BOOK_EDIT:
-            _category = action.book.category;
-            _subcategory = action.book.subcategory;
-            _get_stats();
-            CategoryNumberStore.emitChange();
-        break;
-        case BookConstants.BOOK_CHANGE:
-            _category = action.book.category;
-            _subcategory = action.book.subcategory;
-            _get_stats();
-            CategoryNumberStore.emitChange();
-        break;
-        case BookConstants.COUNT_STATS:
-            _get_stats();
-            CategoryNumberStore.emitChange();
-        break;
-        case BookConstants.BOOK_EDIT_CANCEL:
-            _category = undefined;
-            _subcategory = undefined;
-            _get_stats();
-            CategoryNumberStore.emitChange();
-        break;
-    }
-    return true;
-});
-
-
-module.exports.CategoryNumberStore = CategoryNumberStore;
-
-},{"../constants/BookConstants":179,"../dispatcher/AppDispatcher":180,"./CategoryStore":184,"events":1,"jquery":6}],184:[function(require,module,exports){
-var $ = require('jquery');
-var EventEmitter = require('events').EventEmitter;
-var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
 var BookConstants = require('../constants/BookConstants');
 var CategoryActions = require('../actions/CategoryActions').CategoryActions;
 
@@ -30841,7 +30775,7 @@ CategoryStore.dispatchToken = AppDispatcher.register(function(action) {
 module.exports.CategoryStore = CategoryStore;
 module.exports.loadCategories = _load_categories;
 
-},{"../actions/CategoryActions":164,"../constants/BookConstants":179,"../dispatcher/AppDispatcher":180,"events":1,"jquery":6}],185:[function(require,module,exports){
+},{"../actions/CategoryActions":164,"../constants/BookConstants":179,"../dispatcher/AppDispatcher":180,"events":1,"jquery":6}],184:[function(require,module,exports){
 var $ = require('jquery');
 var EventEmitter = require('events').EventEmitter;
 var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
@@ -30881,10 +30815,10 @@ MessageStore.dispatchToken = AppDispatcher.register(function(action) {
 
 module.exports.MessageStore = MessageStore;
 
-},{"../constants/BookConstants":179,"../dispatcher/AppDispatcher":180,"events":1,"jquery":6}],186:[function(require,module,exports){
+},{"../constants/BookConstants":179,"../dispatcher/AppDispatcher":180,"events":1,"jquery":6}],185:[function(require,module,exports){
 var React = require('react');
 var BookPanel = require('./components/BookPanel.react').BookPanel;
 
 React.render(React.createElement(BookPanel, null), document.getElementById('content'));
 
-},{"./components/BookPanel.react":169,"react":161}]},{},[186]);
+},{"./components/BookPanel.react":169,"react":161}]},{},[185]);

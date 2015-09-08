@@ -191,7 +191,6 @@ BookStore.dispatchToken = AppDispatcher.register(function(action) {
             _search();
         break;
         case BookConstants.AUTHOR_DELETE_OK:
-            console.log("AUTTHOR DEL OK");
             _search();
         break;
         case BookConstants.BOOK_SORT:

@@ -2,7 +2,6 @@ var $ = require('jquery');
 var EventEmitter = require('events').EventEmitter;
 var AppDispatcher = require('../dispatcher/AppDispatcher').AppDispatcher;
 var BookConstants = require('../constants/BookConstants');
-var CategoryActions = require('../actions/CategoryActions').CategoryActions;
 
 var _state = {
     categories: [],
@@ -28,8 +27,6 @@ var _load_categories = function() {
         },
         error: function(xhr, status, err) {
             console.error(this.props.url, status, err.toString());
-            _state.message = err.toString();
-            CategoryStore.emitChange();
         }
     });
 };
@@ -44,10 +41,6 @@ var _load_subcategories = function(cat) {
     if(_subcat_cache[cat]) {
         _state.subcategories = _subcat_cache[cat] ;
         CategoryStore.emitChange();
-        // The action in a different call
-        setTimeout(function() {
-            CategoryActions.count_stats();
-        }, 0);
     }
     $.ajax({
         url: _props.subcategories_url+'?category='+cat,
@@ -57,12 +50,9 @@ var _load_subcategories = function(cat) {
             _state.subcategories = data;
             _subcat_cache[cat] = data;
             CategoryStore.emitChange();
-            CategoryActions.count_stats()
         },
         error: function(xhr, status, err) {
             console.error(this.props.url, status, err.toString());
-            _state.message = err.toString();
-            CategoryStore.emitChange();
         }
     });
 };
@@ -87,10 +77,7 @@ CategoryStore.dispatchToken = AppDispatcher.register(function(action) {
     switch(action.actionType) {
         case BookConstants.BOOK_EDIT:
         case BookConstants.BOOK_CHANGE:
-            //if(action.book.category!=_current_cat) {
-                _load_subcategories(action.book.category);
-              //  _current_cat=action.book.category
-            //}
+            _load_subcategories(action.book.category);
         break;
         case BookConstants.BOOK_EDIT_CANCEL:
             _state.subcategories = [];

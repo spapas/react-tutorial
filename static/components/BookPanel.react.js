@@ -29,7 +29,6 @@ var BookPanel = React.createClass({
                 <div className="one-half column">
                     <BookForm
                         book={this.state.editingBook}
-                        message={this.state.message}
                     />
                 </div>
                 <br />

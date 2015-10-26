@@ -49,7 +49,7 @@ var BookForm = React.createClass({
         BookActions.save(this.props.book)
     },
     onTitleChange: function() {
-        this.props.book.title = React.findDOMNode(this.refs.title).value;
+        this.props.book.title = this.refs.title.getDOMNode().value;
         BookActions.change_book(this.props.book);
     },
     onDateChange: function(date) {

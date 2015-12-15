@@ -57,6 +57,7 @@ var BookForm = React.createClass({
         return(
             <form onSubmit={this.props.handleSubmitClick}>
                 <label forHtml='title'>Title</label><input ref='title' name='title' type='text' value={this.props.book.title} onChange={this.onChange}/>
+                {this.props.book.titleError?<div>{this.props.book.titleError}</div>:null}
                 <label forHtml='category'>Category</label>
                 <select ref='category' name='category' value={this.props.book.category} onChange={this.onChange} >
                     <option value='CRIME' >Crime</option>
@@ -103,9 +104,9 @@ var BookPanel = React.createClass({
                     <BookTable books={this.state.books} handleEditClickPanel={this.handleEditClickPanel} />
                 </div>
                 <div className="one-half column">
-                    <BookForm 
-                        book={this.state.editingBook} 
-                        message={this.state.message} 
+                    <BookForm
+                        book={this.state.editingBook}
+                        message={this.state.message}
                         handleChange={this.handleChange}
                         handleSubmitClick={this.handleSubmitClick}
                         handleCancelClick={this.handleCancelClick}
@@ -139,16 +140,21 @@ var BookPanel = React.createClass({
         var book = $.extend({}, this.state.books.filter(function(x) {
             return x.id == id;
         })[0] );
-        
+
         this.setState({
             editingBook: book,
             message: ''
         });
     },
     handleChange: function(title, category) {
+        var titleError = undefined;
+        if(title.length > 1 && title === title.toUpperCase()) {
+            titleError='Please don\'t use only capital letters for book titles';
+        }
         this.setState({
             editingBook: {
                 title: title,
+                titleError: titleError,
                 category: category,
                 id: this.state.editingBook.id
             }
@@ -158,7 +164,7 @@ var BookPanel = React.createClass({
         this.setState({
             editingBook: {}
         });
-    },    
+    },
     reloadBooks: function(query) {
         $.ajax({
             url: this.props.url+'?search='+query,
@@ -180,6 +186,14 @@ var BookPanel = React.createClass({
     },
     handleSubmitClick: function(e) {
         e.preventDefault();
+
+        if(this.state.editingBook.titleError) {
+            this.setState({
+                message: "Please fix errors!"
+            });
+            return ;
+        }
+
         if(this.state.editingBook.id) {
             $.ajax({
                 url: this.props.url+this.state.editingBook.id,

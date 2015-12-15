@@ -19,6 +19,7 @@ the simplest case to the most complex one):
 To get the code for a tag, just clone the repository and do a:
 
 ``git checkout TAG``
+
 ``python manage.py syncdb``
 
 If you want to go to a different tag, you'll just do again a checkout to

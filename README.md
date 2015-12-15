@@ -10,17 +10,17 @@ to the following articles from http://spapas.github.io/:
 To be able to follow the articles, I've added a bunch of tags in the repository(they go from
 the simplest case to the most complex one):
 
-react-only
-react-only-validation
-react-flux
-react-flux-better-organization
-react-flux-complex
+- react-only
+- react-only-validation
+- react-flux
+- react-flux-better-organization
+- react-flux-complex
 
 To get the code for a tag, just clone the repository and do a:
 
-git checkout TAG
-python manage.py syncdb
+``git checkout TAG``
+``python manage.py syncdb``
 
 If you want to go to a different tag, you'll just do again a checkout to
-the corresponding tag, but you'll need to delete the db.sqlite3 file (that
+the corresponding tag, but you'll need to delete the ``db.sqlite3`` file (that
 contains the database schema for the application) and then do a syncdb again.

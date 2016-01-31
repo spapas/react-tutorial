@@ -1,4 +1,5 @@
 A (not so simple) React application
+===================================
 
 This is a central repository that hosts various versions of the react project that correspond
 to the following articles from http://spapas.github.io/:

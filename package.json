@@ -16,17 +16,21 @@
     "watchify": "^3.7.0"
   },
   "dependencies": {
+    "history": "^1.17.0",
     "jquery": "^2.1.4",
     "react": "^0.14.6",
     "react-dom": "^0.14.6",
+    "react-notification": "^4.0.0",
     "react-redux": "^4.0.6",
+    "react-router": "^1.0.3",
+    "react-router-redux": "^2.1.0",
     "redux": "^3.0.6",
     "redux-form": "^4.1.5",
     "redux-thunk": "^1.0.3"
   },
   "scripts": {
-    "watch": "watchify  static/main.js -v -t babelify -o static/bundle.js",
-    "build": "browserify static/main.js -t babelify | uglifyjs -mc warnings=false > static/bundle.js"
+    "watch": "watchify  srcjs/main.js -v -t babelify -o static/bundle.js",
+    "build": "browserify srcjs/main.js -t babelify | uglifyjs -mc warnings=false > static/bundle.js"
   },
   "babel": {
     "presets": [

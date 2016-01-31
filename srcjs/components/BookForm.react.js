@@ -1,3 +1,63 @@
+import React from 'react'
+
+//import { changeFilters, clearFilters, reloadProstima, loadProstimaAction } from '../actions'
+import { reduxForm } from 'redux-form';
+
+
+const submit = (values, dispatch) => {
+    console.log(values)
+    console.log(dispatch)
+    //dispatch(changeFilters(values))
+    //dispatch(reloadProstima())
+    //dispatch(loadProstimaAction())
+};
+
+
+class BookForm extends React.Component {
+
+    render() {
+        const {fields: {
+            title
+        }, handleSubmit, other, dispatch } = this.props;
+
+        return <form className='form-inline' onSubmit={handleSubmit(submit) }>
+            <div className='row'>
+                <div className='one-half column'>
+                    <label forHtml='title'>Title</label>
+                    <input {...title} />
+                </div>
+            </div>
+            
+            <button className='btn btn-primary' onClick={(e) => {
+                e.preventDefault()
+                //dispatch(reset('filterProstimo'));
+                //dispatch(clearFilters())
+                //dispatch(reloadProstima())
+                //dispatch(loadProstimaAction())
+            }}>
+                Αποθήκευση
+            </button>
+
+        </form>
+    }
+};
+
+
+const mapStateToProps = (state, props) => {
+    return {
+        initialValues:state.filters
+    }
+};
+
+const BookFormContainer = reduxForm({
+    form: 'bookForm',
+    fields: ['title' ]
+}, mapStateToProps)(BookForm);
+
+
+export default BookFormContainer;
+/*
+
 var React = require('react');
 var BookActions = require('../actions/BookActions').BookActions;
 var DropDown = require('./DropDown.react.js').DropDown;
@@ -89,3 +149,4 @@ var BookForm = React.createClass({
 
 
 module.exports.BookForm = BookForm;
+*/

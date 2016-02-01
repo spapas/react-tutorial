@@ -7,10 +7,24 @@ export function showBooksResultAction(jsonResult) {
     };
 }
 
-export function showProstimoResultAction(jsonResult) {
+export function showBookResultAction(jsonResult) {
     return {
-        type: "SHOW_PROSTIMO",
-        prostimo: jsonResult
+        type: "SHOW_BOOK",
+        book: jsonResult
+    };
+}
+
+export function showCategoriesResultAction(jsonResult) {
+    return {
+        type: "SHOW_CATEGORIES",
+        categories: jsonResult
+    };
+}
+
+export function showSubCategoriesResultAction(jsonResult) {
+    return {
+        type: "SHOW_SUBCATEGORIES",
+        subcategories: jsonResult
     };
 }
 
@@ -96,28 +110,53 @@ export function loadBooks(page=1) {
         let url = `//127.0.0.1:8000/api/books/?format=json&page=${page}`;
         dispatch(loadingChangedAction(true));
         
-        $.get(url, function(data) {
+        $.get(url, data => {
             setTimeout(() => {
                 dispatch(showBooksResultAction(data));
                 dispatch(loadingChangedAction(false));
-            }, 2000);
+            }, 1000);
         });
     }
 }
 
 
-export function loadProstimοAction(id) {
+export function loadBookAction(id) {
     return (dispatch, getState) => {
-        let url = `${g_urls.getProstimoDetail(id)}?format=json`;
+        let url = `//127.0.0.1:8000/api/books/${id}/?format=json`;
         
         dispatch(loadingChangedAction(true));
         
         $.get(url, function(data) {
             setTimeout(() => {
+                dispatch(showBookResultAction(data));
                 dispatch(loadingChangedAction(false));
-                dispatch(showProstimoResultAction(data));
+                dispatch(loadSubCategories(data.category));
             }, 1000);
         });
+    }
+}
+
+export function loadCategories() {
+    return (dispatch, getState) => {
+        let url = '//127.0.0.1:8000/api/categories/?format=json';
+
+        $.get(url, data => {
+            dispatch(showCategoriesResultAction(data));
+        });
+    }
+}
+
+export function loadSubCategories(category) {
+    return (dispatch, getState) => {
         
+        if(!category) {
+            dispatch(showSubCategoriesResultAction([]));
+            return 
+        }
+        let url = `http://127.0.0.1:8000/api/subcategories/?format=json&category=${category}`;
+
+        $.get(url, data => {
+            dispatch(showSubCategoriesResultAction(data));
+        });
     }
 }

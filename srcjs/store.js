@@ -1,5 +1,5 @@
 import { syncHistory, routeReducer } from 'react-router-redux'
-import { ui, books, notification, filters } from './reducers'
+import { ui, books, notification, filters, categories } from './reducers'
 import createHistory from 'history/lib/createHashHistory'
 
 import thunk from 'redux-thunk';
@@ -12,6 +12,7 @@ const reducer = combineReducers(Object.assign({}, {
         notification,
         filters,
         ui,
+        categories,
     }, {
         routing: routeReducer
     }, {

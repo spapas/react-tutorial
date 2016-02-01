@@ -3,7 +3,7 @@ import BookTableRow from './BookTableRow.react';
 
 
 export default (props) => {
-    let rows = props.books.map(function(book) {
+    let rows = props.rows.map(function(book) {
         return <BookTableRow key={book.id} book={book} />;
     });
     return (

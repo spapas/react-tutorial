@@ -27221,8 +27221,15 @@ function createStore(reducer, initialState, enhancer) {
 
   var currentReducer = reducer;
   var currentState = initialState;
-  var listeners = [];
+  var currentListeners = [];
+  var nextListeners = currentListeners;
   var isDispatching = false;
+
+  function ensureCanMutateNextListeners() {
+    if (nextListeners === currentListeners) {
+      nextListeners = currentListeners.slice();
+    }
+  }
 
   /**
    * Reads the state tree managed by the store.
@@ -27237,9 +27244,21 @@ function createStore(reducer, initialState, enhancer) {
    * Adds a change listener. It will be called any time an action is dispatched,
    * and some part of the state tree may potentially have changed. You may then
    * call `getState()` to read the current state tree inside the callback.
-   * Note, the listener should not expect to see all states changes, as the
-   * state might have been updated multiple times before the listener is
-   * notified.
+   *
+   * You may call `dispatch()` from a change listener, with the following
+   * caveats:
+   *
+   * 1. The subscriptions are snapshotted just before every `dispatch()` call.
+   * If you subscribe or unsubscribe while the listeners are being invoked, this
+   * will not have any effect on the `dispatch()` that is currently in progress.
+   * However, the next `dispatch()` call, whether nested or not, will use a more
+   * recent snapshot of the subscription list.
+   *
+   * 2. The listener should not expect to see all states changes, as the state
+   * might have been updated multiple times during a nested `dispatch()` before
+   * the listener is called. It is, however, guaranteed that all subscribers
+   * registered before the `dispatch()` started will be called with the latest
+   * state by the time it exits.
    *
    * @param {Function} listener A callback to be invoked on every dispatch.
    * @returns {Function} A function to remove this change listener.
@@ -27249,8 +27268,10 @@ function createStore(reducer, initialState, enhancer) {
       throw new Error('Expected listener to be a function.');
     }
 
-    listeners.push(listener);
     var isSubscribed = true;
+
+    ensureCanMutateNextListeners();
+    nextListeners.push(listener);
 
     return function unsubscribe() {
       if (!isSubscribed) {
@@ -27258,8 +27279,10 @@ function createStore(reducer, initialState, enhancer) {
       }
 
       isSubscribed = false;
-      var index = listeners.indexOf(listener);
-      listeners.splice(index, 1);
+
+      ensureCanMutateNextListeners();
+      var index = nextListeners.indexOf(listener);
+      nextListeners.splice(index, 1);
     };
   }
 
@@ -27308,9 +27331,11 @@ function createStore(reducer, initialState, enhancer) {
       isDispatching = false;
     }
 
-    listeners.slice().forEach(function (listener) {
-      return listener();
-    });
+    var listeners = currentListeners = nextListeners;
+    for (var i = 0; i < listeners.length; i++) {
+      listeners[i]();
+    }
+
     return action;
   }
 
@@ -27383,7 +27408,7 @@ var _utilsWarning2 = _interopRequireDefault(_utilsWarning);
 */
 function isCrushed() {}
 
-if (process.env.NODE_ENV !== 'production' && setInterval.name === 'setInterval' && isCrushed.name !== 'isCrushed') {
+if (process.env.NODE_ENV !== 'production' && typeof isCrushed.name === 'string' && isCrushed.name !== 'isCrushed') {
   _utilsWarning2['default']('You are currently using minified code outside of NODE_ENV === \'production\'. ' + 'This means that you are running a slower development build of Redux. ' + 'You can use loose-envify (https://github.com/zertosh/loose-envify) for browserify ' + 'or DefinePlugin for webpack (http://stackoverflow.com/questions/30030031) ' + 'to ensure you have the correct code for your production build.');
 }
 
@@ -27460,7 +27485,9 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.showBooksResultAction = showBooksResultAction;
-exports.showProstimoResultAction = showProstimoResultAction;
+exports.showBookResultAction = showBookResultAction;
+exports.showCategoriesResultAction = showCategoriesResultAction;
+exports.showSubCategoriesResultAction = showSubCategoriesResultAction;
 exports.loadingChangedAction = loadingChangedAction;
 exports.submittingChangedAction = submittingChangedAction;
 exports.loadingRowsChangedAction = loadingRowsChangedAction;
@@ -27473,7 +27500,9 @@ exports.changeFilters = changeFilters;
 exports.clearFilters = clearFilters;
 exports.changeAddRemarkModal = changeAddRemarkModal;
 exports.loadBooks = loadBooks;
-exports.loadProstimοAction = loadProstimοAction;
+exports.loadBookAction = loadBookAction;
+exports.loadCategories = loadCategories;
+exports.loadSubCategories = loadSubCategories;
 function showBooksResultAction(jsonResult) {
     return {
         type: "SHOW_BOOKS",
@@ -27481,10 +27510,24 @@ function showBooksResultAction(jsonResult) {
     };
 }
 
-function showProstimoResultAction(jsonResult) {
+function showBookResultAction(jsonResult) {
     return {
-        type: "SHOW_PROSTIMO",
-        prostimo: jsonResult
+        type: "SHOW_BOOK",
+        book: jsonResult
+    };
+}
+
+function showCategoriesResultAction(jsonResult) {
+    return {
+        type: "SHOW_CATEGORIES",
+        categories: jsonResult
+    };
+}
+
+function showSubCategoriesResultAction(jsonResult) {
+    return {
+        type: "SHOW_SUBCATEGORIES",
+        subcategories: jsonResult
     };
 }
 
@@ -27575,28 +27618,56 @@ function loadBooks() {
             setTimeout(function () {
                 dispatch(showBooksResultAction(data));
                 dispatch(loadingChangedAction(false));
-            }, 2000);
+            }, 1000);
         });
     };
 }
 
-function loadProstimοAction(id) {
+function loadBookAction(id) {
     return function (dispatch, getState) {
-        var url = g_urls.getProstimoDetail(id) + "?format=json";
+        var url = "//127.0.0.1:8000/api/books/" + id + "/?format=json";
 
         dispatch(loadingChangedAction(true));
 
         $.get(url, function (data) {
             setTimeout(function () {
+                dispatch(showBookResultAction(data));
                 dispatch(loadingChangedAction(false));
-                dispatch(showProstimoResultAction(data));
+                dispatch(loadSubCategories(data.category));
             }, 1000);
+        });
+    };
+}
+
+function loadCategories() {
+    return function (dispatch, getState) {
+        var url = '//127.0.0.1:8000/api/categories/?format=json';
+
+        $.get(url, function (data) {
+            dispatch(showCategoriesResultAction(data));
+        });
+    };
+}
+
+function loadSubCategories(category) {
+    return function (dispatch, getState) {
+
+        if (!category) {
+            dispatch(showSubCategoriesResultAction([]));
+            return;
+        }
+        var url = "http://127.0.0.1:8000/api/subcategories/?format=json&category=" + category;
+
+        $.get(url, function (data) {
+            dispatch(showSubCategoriesResultAction(data));
         });
     };
 }
 
 },{}],278:[function(require,module,exports){
 'use strict';
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -27608,7 +27679,11 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _actions = require('../actions');
+
 var _reduxForm = require('redux-form');
+
+var _reactRouterRedux = require('react-router-redux');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -27618,14 +27693,35 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-//import { changeFilters, clearFilters, reloadProstima, loadProstimaAction } from '../actions'
+var submit = function submit(id, values, dispatch) {
 
-var submit = function submit(values, dispatch) {
-    console.log(values);
-    console.log(dispatch);
-    //dispatch(changeFilters(values))
-    //dispatch(reloadProstima())
-    //dispatch(loadProstimaAction())
+    var url = '//127.0.0.1:8000/api/books/';
+    var type = 'POST';
+
+    if (id) {
+        url = '//127.0.0.1:8000/api/books/' + id + '/';
+        type = 'PUT';
+    }
+
+    $.ajax({
+        type: type,
+        url: url,
+        data: values,
+        success: function success(d) {
+
+            // TODO: This returns the modified object - should be used instead of "reloading"
+            //dispatch(submittingChangedAction(false))
+            dispatch((0, _actions.loadBooks)());
+
+            dispatch((0, _actions.showSuccessNotification)('Επιτυχής αποθήκευση!'));
+            dispatch(_reactRouterRedux.routeActions.push('/'));
+        },
+        error: function error(d) {
+            //dispatch(submittingChangedAction(false))
+            console.log(d);
+            dispatch((0, _actions.showErrorNotification)('Error (' + d.status + ' - ' + d.statusText + ') while saving: ' + d.responseText));
+        }
+    });
 };
 
 var BookForm = function (_React$Component) {
@@ -27641,40 +27737,114 @@ var BookForm = function (_React$Component) {
         key: 'render',
         value: function render() {
             var _props = this.props;
-            var title = _props.fields.title;
+            var _props$fields = _props.fields;
+            var title = _props$fields.title;
+            var category = _props$fields.category;
+            var subcategory = _props$fields.subcategory;
             var handleSubmit = _props.handleSubmit;
-            var other = _props.other;
             var dispatch = _props.dispatch;
+            var id = this.props.params.id;
+            var isLoading = this.props.ui.isLoading;
+            var _props$categories = this.props.categories;
+            var categories = _props$categories.categories;
+            var subcategories = _props$categories.subcategories;
+
+            var tsubmit = submit.bind(undefined, id);
 
             return _react2.default.createElement(
                 'form',
-                { className: 'form-inline', onSubmit: handleSubmit(submit) },
+                { onSubmit: handleSubmit(tsubmit) },
+                isLoading ? _react2.default.createElement(
+                    'div',
+                    { className: 'loading' },
+                    'Loading…'
+                ) : null,
                 _react2.default.createElement(
                     'div',
                     { className: 'row' },
                     _react2.default.createElement(
                         'div',
-                        { className: 'one-half column' },
+                        { className: 'six columns' },
                         _react2.default.createElement(
                             'label',
                             { forHtml: 'title' },
                             'Title'
                         ),
-                        _react2.default.createElement('input', title)
+                        _react2.default.createElement('input', _extends({ type: 'text', className: 'u-full-width' }, title))
+                    )
+                ),
+                _react2.default.createElement(
+                    'div',
+                    { className: 'row' },
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'six columns' },
+                        _react2.default.createElement(
+                            'label',
+                            { forHtml: 'category' },
+                            'Category'
+                        ),
+                        _react2.default.createElement(
+                            'select',
+                            _extends({ type: 'text', className: 'u-full-width' }, category, { onChange: function onChange(event) {
+                                    category.onChange(event);
+                                    dispatch((0, _actions.loadSubCategories)(event.target.value));
+                                } }),
+                            _react2.default.createElement('option', null),
+                            categories.map(function (c) {
+                                return _react2.default.createElement(
+                                    'option',
+                                    { value: c.id, key: c.id },
+                                    c.name
+                                );
+                            })
+                        )
+                    ),
+                    _react2.default.createElement(
+                        'div',
+                        { className: 'six columns' },
+                        _react2.default.createElement(
+                            'label',
+                            { forHtml: 'subcategory' },
+                            'Subcategory'
+                        ),
+                        _react2.default.createElement(
+                            'select',
+                            _extends({ type: 'text', className: 'u-full-width' }, subcategory),
+                            _react2.default.createElement('option', null),
+                            subcategories.map(function (c) {
+                                return _react2.default.createElement(
+                                    'option',
+                                    { value: c.id, key: c.id },
+                                    c.name
+                                );
+                            })
+                        )
                     )
                 ),
                 _react2.default.createElement(
                     'button',
-                    { className: 'btn btn-primary', onClick: function onClick(e) {
-                            e.preventDefault();
-                            //dispatch(reset('filterProstimo'));
-                            //dispatch(clearFilters())
-                            //dispatch(reloadProstima())
-                            //dispatch(loadProstimaAction())
-                        } },
+                    { className: 'btn btn-primary', onClick: handleSubmit(tsubmit) },
                     'Αποθήκευση'
                 )
             );
+        }
+    }, {
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+
+            if (this.props.categories.categories.length == 0) {
+                this.props.dispatch((0, _actions.loadCategories)());
+            }
+
+            if (this.props.params.id) {
+                if (!this.props.book || this.props.book.id != this.props.params.id) {
+
+                    this.props.dispatch((0, _actions.loadBookAction)(this.props.params.id));
+                }
+            } else {
+                // New book
+            }
         }
     }]);
 
@@ -27684,14 +27854,24 @@ var BookForm = function (_React$Component) {
 ;
 
 var mapStateToProps = function mapStateToProps(state, props) {
+    var initial = {};
+    var book = state.books.book;
+
+    if (props.params.id && book) {
+        initial = book;
+    }
+
     return {
-        initialValues: state.filters
+        book: state.books.book,
+        ui: state.ui,
+        categories: state.categories,
+        initialValues: initial
     };
 };
 
 var BookFormContainer = (0, _reduxForm.reduxForm)({
     form: 'bookForm',
-    fields: ['title']
+    fields: ['title', 'category', 'subcategory']
 }, mapStateToProps)(BookForm);
 
 exports.default = BookFormContainer;
@@ -27790,7 +27970,7 @@ var BookForm = React.createClass({
 module.exports.BookForm = BookForm;
 */
 
-},{"react":220,"redux-form":244}],279:[function(require,module,exports){
+},{"../actions":277,"react":220,"react-router-redux":38,"redux-form":244}],279:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -27810,6 +27990,8 @@ var _BookTable = require('./BookTable.react');
 var _BookTable2 = _interopRequireDefault(_BookTable);
 
 var _actions = require('../actions');
+
+var _reactRouter = require('react-router');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -27832,7 +28014,7 @@ var BookPanel = function (_React$Component) {
         key: 'render',
         value: function render() {
             var _props$books = this.props.books;
-            var books = _props$books.books;
+            var rows = _props$books.rows;
             var count = _props$books.count;
             var isLoading = this.props.ui.isLoading;
 
@@ -27846,15 +28028,25 @@ var BookPanel = function (_React$Component) {
                 ) : null,
                 _react2.default.createElement(
                     'div',
-                    { className: 'one column' },
-                    isLoading ? "LOADING" : _react2.default.createElement(_BookTable2.default, { books: books })
+                    { className: 'twelve columns' },
+                    _react2.default.createElement(
+                        'h3',
+                        null,
+                        'Book list ',
+                        _react2.default.createElement(
+                            _reactRouter.Link,
+                            { className: 'button', to: '/book_create/' },
+                            '+'
+                        )
+                    ),
+                    isLoading ? "..." : _react2.default.createElement(_BookTable2.default, { rows: rows })
                 )
             );
         }
     }, {
         key: 'componentDidMount',
         value: function componentDidMount() {
-            if (this.props.books.books.length == 0) {
+            if (this.props.books.rows.length == 0) {
                 this.props.dispatch((0, _actions.loadBooks)());
             }
         }
@@ -27872,7 +28064,7 @@ var mapStateToProps = function mapStateToProps(state) {
 
 exports.default = (0, _reactRedux.connect)(mapStateToProps)(BookPanel);
 
-},{"../actions":277,"./BookTable.react":280,"react":220,"react-redux":31}],280:[function(require,module,exports){
+},{"../actions":277,"./BookTable.react":280,"react":220,"react-redux":31,"react-router":58}],280:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -27890,7 +28082,7 @@ var _BookTableRow2 = _interopRequireDefault(_BookTableRow);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = function (props) {
-    var rows = props.books.map(function (book) {
+    var rows = props.rows.map(function (book) {
         return _react2.default.createElement(_BookTableRow2.default, { key: book.id, book: book });
     });
     return _react2.default.createElement(
@@ -28216,6 +28408,7 @@ var NoMatch = function NoMatch() {
             _reactRouter.Route,
             { path: '/', component: _app2.default },
             _react2.default.createElement(_reactRouter.IndexRoute, { component: _BookPanel2.default }),
+            _react2.default.createElement(_reactRouter.Route, { path: '/book_create/', component: _BookForm2.default }),
             _react2.default.createElement(_reactRouter.Route, { path: '/book_update/:id', component: _BookForm2.default }),
             _react2.default.createElement(_reactRouter.Route, { path: '/about', component: About }),
             _react2.default.createElement(_reactRouter.Route, { path: '*', component: NoMatch })
@@ -28286,8 +28479,9 @@ var ui = exports.ui = function ui() {
 };
 
 var BOOKS_INITIAL = {
-    books: [],
-    coun: 0
+    rows: [],
+    count: 0,
+    book: {}
 };
 var books = exports.books = function books() {
     var state = arguments.length <= 0 || arguments[0] === undefined ? BOOKS_INITIAL : arguments[0];
@@ -28296,12 +28490,40 @@ var books = exports.books = function books() {
     switch (action.type) {
         case 'SHOW_BOOKS':
             return Object.assign({}, state, {
-                books: action.books.results,
+                rows: action.books.results,
                 count: action.books.count
             });
             break;
+        case 'SHOW_BOOK':
+            return Object.assign({}, state, {
+                book: action.book
+            });
+            break;
 
-            return Object.assign({}, state, { showAddRemarkModal: showAddRemarkModal });
+    }
+    return state;
+};
+
+var CATEGORIES_INITIAL = {
+    categories: [],
+    subcategories: []
+};
+
+var categories = exports.categories = function categories() {
+    var state = arguments.length <= 0 || arguments[0] === undefined ? CATEGORIES_INITIAL : arguments[0];
+    var action = arguments[1];
+
+    switch (action.type) {
+        case 'SHOW_CATEGORIES':
+            return Object.assign({}, state, {
+                categories: action.categories
+            });
+            break;
+        case 'SHOW_SUBCATEGORIES':
+            return Object.assign({}, state, {
+                subcategories: action.subcategories
+            });
+            break;
 
     }
     return state;
@@ -28377,7 +28599,8 @@ var reducer = (0, _redux.combineReducers)(Object.assign({}, {
     books: _reducers.books,
     notification: _reducers.notification,
     filters: _reducers.filters,
-    ui: _reducers.ui
+    ui: _reducers.ui,
+    categories: _reducers.categories
 }, {
     routing: _reactRouterRedux.routeReducer
 }, {

@@ -40,20 +40,46 @@ export const ui = (state={}, action) => {
 }
 
 const BOOKS_INITIAL = {
-    books: [],
-    coun: 0,
+    rows: [],
+    count: 0,
+    book: {},
 }
 export const books = (state=BOOKS_INITIAL, action) => {
     switch (action.type) {
         case 'SHOW_BOOKS':
             return Object.assign({}, state, {
-                books: action.books.results,
+                rows: action.books.results,
                 count: action.books.count,
             });
             break;
+        case 'SHOW_BOOK':
+            return Object.assign({}, state, {
+                book: action.book
+            });
+            break;
 
-        return Object.assign({}, state, {showAddRemarkModal})
-        
+    }
+    return state;
+}
+
+const CATEGORIES_INITIAL = {
+    categories: [],
+    subcategories: [],
+}
+
+export const categories = (state=CATEGORIES_INITIAL, action) => {
+    switch (action.type) {
+        case 'SHOW_CATEGORIES':
+            return Object.assign({}, state, {
+                categories: action.categories
+            });
+            break;
+        case 'SHOW_SUBCATEGORIES':
+            return Object.assign({}, state, {
+                subcategories: action.subcategories
+            });
+            break;
+
     }
     return state;
 }

@@ -30,6 +30,7 @@ render((
         <Router history={history}>
             <Route path="/" component={App}>
                 <IndexRoute component={BookPanel}/>
+                <Route path="/book_create/" component={BookForm}/>
                 <Route path="/book_update/:id" component={BookForm}/>
                 <Route path="/about" component={About}/>
                 <Route path="*" component={NoMatch}/>

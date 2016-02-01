@@ -1,15 +1,44 @@
 import React from 'react'
 
-//import { changeFilters, clearFilters, reloadProstima, loadProstimaAction } from '../actions'
+import { loadBooks, loadBookAction, showSuccessNotification, 
+    showErrorNotification, loadCategories, loadSubCategories
+} from '../actions'
 import { reduxForm } from 'redux-form';
+import { routeActions } from 'react-router-redux'
 
 
-const submit = (values, dispatch) => {
-    console.log(values)
-    console.log(dispatch)
-    //dispatch(changeFilters(values))
-    //dispatch(reloadProstima())
-    //dispatch(loadProstimaAction())
+const submit = (id, values, dispatch) => {
+
+    let url = '//127.0.0.1:8000/api/books/'
+    let type = 'POST'
+
+    if(id) {
+        url = `//127.0.0.1:8000/api/books/${id}/`
+        type = 'PUT'
+    }
+    
+    $.ajax({
+        type,
+        url,
+        data: values,
+        success: (d) => {
+            
+            // TODO: This returns the modified object - should be used instead of "reloading"
+            //dispatch(submittingChangedAction(false))
+            dispatch(loadBooks())
+            
+            dispatch(showSuccessNotification('Επιτυχής αποθήκευση!'))
+            dispatch(routeActions.push('/'));
+
+        },
+        error: (d) => {
+            //dispatch(submittingChangedAction(false))
+            console.log(d);
+            dispatch(showErrorNotification(`Error (${d.status} - ${d.statusText}) while saving: ${d.responseText}` ))
+        }
+    });
+    
+    
 };
 
 
@@ -17,41 +46,86 @@ class BookForm extends React.Component {
 
     render() {
         const {fields: {
-            title
-        }, handleSubmit, other, dispatch } = this.props;
+            title, category, subcategory
+        }, handleSubmit, dispatch } = this.props;
+        const { id } = this.props.params;
+        const { isLoading } = this.props.ui;
+        const { categories, subcategories } = this.props.categories;
+        
+        const tsubmit = submit.bind(undefined,id);
 
-        return <form className='form-inline' onSubmit={handleSubmit(submit) }>
+        return <form   onSubmit={handleSubmit(tsubmit) }>
+            {isLoading?<div className="loading">Loading&#8230;</div>:null}
             <div className='row'>
-                <div className='one-half column'>
+                <div className='six columns'>
                     <label forHtml='title'>Title</label>
-                    <input {...title} />
+                    <input type='text' className="u-full-width" {...title} />
+                </div>
+            </div>
+            <div className='row'>
+                <div className='six columns'>
+                    <label forHtml='category'>Category</label>
+                    <select type='text' className="u-full-width" {...category} onChange={ event => {
+                        category.onChange(event);
+                        dispatch(loadSubCategories(event.target.value))
+                    }}>
+                        <option></option>
+                        {categories.map(c => <option value={c.id} key={c.id} >{c.name}</option>)}
+                    </select>
+                </div>
+                <div className='six columns'>
+                    <label forHtml='subcategory'>Subcategory</label>
+                    <select type='text' className="u-full-width" {...subcategory} >
+                        <option></option>
+                        {subcategories.map(c => <option value={c.id} key={c.id} >{c.name}</option>)}
+                    </select>
                 </div>
             </div>
             
-            <button className='btn btn-primary' onClick={(e) => {
-                e.preventDefault()
-                //dispatch(reset('filterProstimo'));
-                //dispatch(clearFilters())
-                //dispatch(reloadProstima())
-                //dispatch(loadProstimaAction())
-            }}>
+            <button className='btn btn-primary' onClick={handleSubmit(tsubmit)}>
                 Αποθήκευση
             </button>
 
         </form>
     }
+    
+    componentDidMount() {
+        
+        if(this.props.categories.categories.length==0) {
+            this.props.dispatch(loadCategories());
+        }
+        
+        if (this.props.params.id) {
+            if(!this.props.book || this.props.book.id != this.props.params.id) {
+                
+                this.props.dispatch(loadBookAction(this.props.params.id));
+            }
+        } else {
+            // New book 
+        }
+    }
 };
 
 
 const mapStateToProps = (state, props) => {
+    let initial = {}
+    const { book } = state.books
+
+    if(props.params.id && book) {
+        initial = book
+    }
+    
     return {
-        initialValues:state.filters
+        book:state.books.book,
+        ui:state.ui,
+        categories:state.categories,
+        initialValues:initial,
     }
 };
 
 const BookFormContainer = reduxForm({
     form: 'bookForm',
-    fields: ['title' ]
+    fields: ['title', 'category', 'subcategory' ]
 }, mapStateToProps)(BookForm);
 
 

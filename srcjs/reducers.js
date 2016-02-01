@@ -42,6 +42,8 @@ export const ui = (state={}, action) => {
 const BOOKS_INITIAL = {
     rows: [],
     count: 0,
+    page: 1,
+    sorting: undefined,
     book: {},
 }
 export const books = (state=BOOKS_INITIAL, action) => {
@@ -55,6 +57,38 @@ export const books = (state=BOOKS_INITIAL, action) => {
         case 'SHOW_BOOK':
             return Object.assign({}, state, {
                 book: action.book
+            });
+            break;
+        case 'CHANGE_PAGE':
+            return Object.assign({}, state, {
+                page: action.page
+            });
+            break;    
+        case 'TOGGLE_SORTING':
+            return Object.assign({}, state, {
+                sorting: (state.sorting==action.sorting)?('-'+action.sorting):action.sorting
+            });
+            break;    
+
+    }
+    return state;
+}
+
+const AUTHORS_INITIAL = {
+    rows: [],
+    author: {},
+}
+export const authors = (state=AUTHORS_INITIAL, action) => {
+    switch (action.type) {
+        case 'SHOW_AUTHORS':
+            
+            return Object.assign({}, state, {
+                rows: action.authors
+            });
+            break;
+        case 'SHOW_AUTHOR':
+            return Object.assign({}, state, {
+                author: action.author
             });
             break;
 

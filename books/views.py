@@ -31,9 +31,10 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, filters.OrderingFilter)
     search_fields = ('last_name', 'first_name', )
-
+    ordering_fields = ('id', 'last_name', )
+    ordering = ('last_name',)
 
 class SubCategoryViewSet(viewsets.ModelViewSet):
     queryset = SubCategory.objects.all()

@@ -14,6 +14,21 @@ export function showBookResultAction(jsonResult) {
     };
 }
 
+export function showAuthorsResultAction(jsonResult) {
+    return {
+        type: "SHOW_AUTHORS",
+        authors: jsonResult
+    };
+}
+
+export function showAuthorResultAction(jsonResult) {
+    return {
+        type: "SHOW_AUTHOR",
+        author: jsonResult
+    };
+}
+
+
 export function showCategoriesResultAction(jsonResult) {
     return {
         type: "SHOW_CATEGORIES",
@@ -42,17 +57,17 @@ export function submittingChangedAction(isSubmitting) {
     }
 }
 
-export function loadingRowsChangedAction(isLoadingRows) {
+export function toggleSorting(sorting) {
     return {
-        type: "IS_LOADING_ROWS",
-        isLoadingRows
+        type: "TOGGLE_SORTING",
+        sorting
     }
 }
 
-export function appendProstimoRemark(remark) {
+export function changePage(page) {
     return {
-        type: "APPEND_PROSTIMO_REMARK",
-        remark
+        type: "CHANGE_PAGE",
+        page
     }
 }
 
@@ -78,11 +93,6 @@ export function hideNotification() {
     }
 }
 
-export function reloadProstima() {
-    return {
-        type: 'RELOAD_PROSTIMA'
-    }
-}
 
 export function changeFilters(filters) {
     return {
@@ -97,19 +107,15 @@ export function clearFilters(filters) {
     }
 }
 
-export function changeAddRemarkModal(showAddRemarkModal) {
-    return {
-        type: 'CHANGE_ADD_REMARK',
-        showAddRemarkModal
-    }
-}
-
-
 export function loadBooks(page=1) {
     return (dispatch, getState) => {
+        let state = getState();
+        let { page, sorting} = state.books
         let url = `//127.0.0.1:8000/api/books/?format=json&page=${page}`;
+        if(sorting) {
+            url+=`&ordering=${sorting}`
+        }
         dispatch(loadingChangedAction(true));
-        
         $.get(url, data => {
             setTimeout(() => {
                 dispatch(showBooksResultAction(data));
@@ -123,14 +129,39 @@ export function loadBooks(page=1) {
 export function loadBookAction(id) {
     return (dispatch, getState) => {
         let url = `//127.0.0.1:8000/api/books/${id}/?format=json`;
-        
         dispatch(loadingChangedAction(true));
-        
         $.get(url, function(data) {
             setTimeout(() => {
                 dispatch(showBookResultAction(data));
                 dispatch(loadingChangedAction(false));
                 dispatch(loadSubCategories(data.category));
+            }, 1000);
+        });
+    }
+}
+
+export function loadAuthors(page=1) {
+    return (dispatch, getState) => {
+        let url = `//127.0.0.1:8000/api/authors/?format=json&page=${page}`;
+        dispatch(loadingChangedAction(true));
+        $.get(url, data => {
+            setTimeout(() => {
+                dispatch(showAuthorsResultAction(data));
+                dispatch(loadingChangedAction(false));
+            }, 1000);
+        });
+    }
+}
+
+
+export function loadAuthorAction(id) {
+    return (dispatch, getState) => {
+        let url = `//127.0.0.1:8000/api/authors/${id}/?format=json`;
+        dispatch(loadingChangedAction(true));
+        $.get(url, function(data) {
+            setTimeout(() => {
+                dispatch(showAuthorResultAction(data));
+                dispatch(loadingChangedAction(false));
             }, 1000);
         });
     }

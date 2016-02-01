@@ -10,11 +10,11 @@ export default class App extends React.Component {
             {this.props.children}
             <NotificationContainer />
             <br />
-            {
-                this.props.location.pathname === "/" ?
-                "":
-                <Link to="/">Books</Link>
-            }
+
+                
+            <Link to="/">Books</Link>
+            <Link to="/authors/">Authors</Link>
+
         </div>
     }
 

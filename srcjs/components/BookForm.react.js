@@ -1,14 +1,14 @@
 import React from 'react'
 
-import { loadBooks, loadBookAction, showSuccessNotification, 
+import { loadBooks, loadAuthors, loadBookAction, showSuccessNotification, 
     showErrorNotification, loadCategories, loadSubCategories
 } from '../actions'
 import { reduxForm } from 'redux-form';
 import { routeActions } from 'react-router-redux'
-
+import DatePicker from './Datepicker.react'
 
 const submit = (id, values, dispatch) => {
-
+    console.log(values)
     let url = '//127.0.0.1:8000/api/books/'
     let type = 'POST'
 
@@ -27,7 +27,7 @@ const submit = (id, values, dispatch) => {
             //dispatch(submittingChangedAction(false))
             dispatch(loadBooks())
             
-            dispatch(showSuccessNotification('Επιτυχής αποθήκευση!'))
+            dispatch(showSuccessNotification('Success!'))
             dispatch(routeActions.push('/'));
 
         },
@@ -46,11 +46,12 @@ class BookForm extends React.Component {
 
     render() {
         const {fields: {
-            title, category, subcategory
+            title, category, subcategory, publish_date, author
         }, handleSubmit, dispatch } = this.props;
         const { id } = this.props.params;
         const { isLoading } = this.props.ui;
         const { categories, subcategories } = this.props.categories;
+        const authors = this.props.authors.rows;
         
         const tsubmit = submit.bind(undefined,id);
 
@@ -82,6 +83,20 @@ class BookForm extends React.Component {
                 </div>
             </div>
             
+            <div className='row'>
+                <div className='six columns'>
+                    <label forHtml='publish_date'>Publish Date</label>
+                    <DatePicker className="u-full-width" {...publish_date} />
+                </div>
+                <div className='six columns'>
+                    <label forHtml='author'>Author</label>
+                    <select type='text' className="u-full-width" {...author} >
+                        <option></option>
+                        {authors.map(a => <option value={a.id} key={a.id} >{a.last_name} {a.first_name}</option>)}
+                    </select>
+                </div>
+            </div>
+            
             <button className='btn btn-primary' onClick={handleSubmit(tsubmit)}>
                 Αποθήκευση
             </button>
@@ -93,6 +108,10 @@ class BookForm extends React.Component {
         
         if(this.props.categories.categories.length==0) {
             this.props.dispatch(loadCategories());
+        }
+        
+        if(this.props.authors.rows.length==0) {
+            this.props.dispatch(loadAuthors());
         }
         
         if (this.props.params.id) {
@@ -110,22 +129,23 @@ class BookForm extends React.Component {
 const mapStateToProps = (state, props) => {
     let initial = {}
     const { book } = state.books
-
+    
     if(props.params.id && book) {
         initial = book
     }
-    
+
     return {
         book:state.books.book,
         ui:state.ui,
         categories:state.categories,
+        authors:state.authors,
         initialValues:initial,
     }
 };
 
 const BookFormContainer = reduxForm({
     form: 'bookForm',
-    fields: ['title', 'category', 'subcategory' ]
+    fields: ['title', 'category', 'subcategory', 'publish_date', 'author' ]
 }, mapStateToProps)(BookForm);
 
 

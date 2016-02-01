@@ -1,23 +1,28 @@
-var React = require('react');
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-var DatePicker = React.createClass({
-    render: function() {
+class DatePicker extends React.Component {
+    render() {
         return(
-            <input type='text' ref='date' value={this.props.value} onChange={this.handleChange} />
+            <input type='text' ref='date' {...this.props} />
         );
-    },
-    componentDidMount: function() {
-        $(React.findDOMNode(this)).datepicker({ dateFormat: 'yy-mm-dd' });
-        $(React.findDOMNode(this)).on('change', this.handleChange);
-    },
-    componentWillUnmount: function() {
+    }
     
-    },
-    handleChange: function() {
-        var date = React.findDOMNode(this.refs.date).value
+    componentDidMount() {
+        $(ReactDOM.findDOMNode(this)).datepicker({ dateFormat: 'yy-mm-dd' });
+        $(ReactDOM.findDOMNode(this)).on('change', this.handleChange.bind(this));
+    }
+    
+    componentWillUnmount() {
+    
+    }
+    
+    handleChange(e) {
+        e.preventDefault()
+        let date = ReactDOM.findDOMNode(this.refs.date).value
         this.props.onChange(date);
     }
-});
+}
 
-module.exports.DatePicker = DatePicker ;
 
+export default DatePicker

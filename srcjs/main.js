@@ -9,7 +9,9 @@ import { history } from './store'
 
 import App from './components/app';
 import BookPanel from './components/BookPanel.react';
+import AuthorPanel from './components/AuthorPanel.react';
 import BookForm from './components/BookForm.react';
+import AuthorForm from './components/AuthorForm.react';
 
 const About = () => {
     return <div>
@@ -30,8 +32,13 @@ render((
         <Router history={history}>
             <Route path="/" component={App}>
                 <IndexRoute component={BookPanel}/>
-                <Route path="/book_create/" component={BookForm}/>
-                <Route path="/book_update/:id" component={BookForm}/>
+                <Route path="/book_create/" component={BookForm} />
+                <Route path="/book_update/:id" component={BookForm} />
+                
+                <Route path="/authors/" component={AuthorPanel} />
+                <Route path="/author_create/" component={AuthorForm} />
+                <Route path="/author_update/:id" component={AuthorForm} />
+                
                 <Route path="/about" component={About}/>
                 <Route path="*" component={NoMatch}/>
             </Route>

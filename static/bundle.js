@@ -27221,15 +27221,8 @@ function createStore(reducer, initialState, enhancer) {
 
   var currentReducer = reducer;
   var currentState = initialState;
-  var currentListeners = [];
-  var nextListeners = currentListeners;
+  var listeners = [];
   var isDispatching = false;
-
-  function ensureCanMutateNextListeners() {
-    if (nextListeners === currentListeners) {
-      nextListeners = currentListeners.slice();
-    }
-  }
 
   /**
    * Reads the state tree managed by the store.
@@ -27244,21 +27237,9 @@ function createStore(reducer, initialState, enhancer) {
    * Adds a change listener. It will be called any time an action is dispatched,
    * and some part of the state tree may potentially have changed. You may then
    * call `getState()` to read the current state tree inside the callback.
-   *
-   * You may call `dispatch()` from a change listener, with the following
-   * caveats:
-   *
-   * 1. The subscriptions are snapshotted just before every `dispatch()` call.
-   * If you subscribe or unsubscribe while the listeners are being invoked, this
-   * will not have any effect on the `dispatch()` that is currently in progress.
-   * However, the next `dispatch()` call, whether nested or not, will use a more
-   * recent snapshot of the subscription list.
-   *
-   * 2. The listener should not expect to see all states changes, as the state
-   * might have been updated multiple times during a nested `dispatch()` before
-   * the listener is called. It is, however, guaranteed that all subscribers
-   * registered before the `dispatch()` started will be called with the latest
-   * state by the time it exits.
+   * Note, the listener should not expect to see all states changes, as the
+   * state might have been updated multiple times before the listener is
+   * notified.
    *
    * @param {Function} listener A callback to be invoked on every dispatch.
    * @returns {Function} A function to remove this change listener.
@@ -27268,10 +27249,8 @@ function createStore(reducer, initialState, enhancer) {
       throw new Error('Expected listener to be a function.');
     }
 
+    listeners.push(listener);
     var isSubscribed = true;
-
-    ensureCanMutateNextListeners();
-    nextListeners.push(listener);
 
     return function unsubscribe() {
       if (!isSubscribed) {
@@ -27279,10 +27258,8 @@ function createStore(reducer, initialState, enhancer) {
       }
 
       isSubscribed = false;
-
-      ensureCanMutateNextListeners();
-      var index = nextListeners.indexOf(listener);
-      nextListeners.splice(index, 1);
+      var index = listeners.indexOf(listener);
+      listeners.splice(index, 1);
     };
   }
 
@@ -27331,11 +27308,9 @@ function createStore(reducer, initialState, enhancer) {
       isDispatching = false;
     }
 
-    var listeners = currentListeners = nextListeners;
-    for (var i = 0; i < listeners.length; i++) {
-      listeners[i]();
-    }
-
+    listeners.slice().forEach(function (listener) {
+      return listener();
+    });
     return action;
   }
 
@@ -27408,7 +27383,7 @@ var _utilsWarning2 = _interopRequireDefault(_utilsWarning);
 */
 function isCrushed() {}
 
-if (process.env.NODE_ENV !== 'production' && typeof isCrushed.name === 'string' && isCrushed.name !== 'isCrushed') {
+if (process.env.NODE_ENV !== 'production' && setInterval.name === 'setInterval' && isCrushed.name !== 'isCrushed') {
   _utilsWarning2['default']('You are currently using minified code outside of NODE_ENV === \'production\'. ' + 'This means that you are running a slower development build of Redux. ' + 'You can use loose-envify (https://github.com/zertosh/loose-envify) for browserify ' + 'or DefinePlugin for webpack (http://stackoverflow.com/questions/30030031) ' + 'to ensure you have the correct code for your production build.');
 }
 
@@ -27716,7 +27691,7 @@ function loadSubCategories(category) {
             dispatch(showSubCategoriesResultAction([]));
             return;
         }
-        var url = 'http://127.0.0.1:8000/api/subcategories/?format=json&category=' + category;
+        var url = '127.0.0.1:8000/api/subcategories/?format=json&category=' + category;
 
         $.get(url, function (data) {
             dispatch(showSubCategoriesResultAction(data));
@@ -27724,7 +27699,7 @@ function loadSubCategories(category) {
     };
 }
 
-},{"./store":293,"./util/formatters":295}],278:[function(require,module,exports){
+},{"./store":294,"./util/formatters":296}],278:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -27906,7 +27881,7 @@ var AuthorFormContainer = (0, _reduxForm.reduxForm)({
 
 exports.default = AuthorFormContainer;
 
-},{"../actions":277,"../util/colors":294,"./Input.react":284,"react":220,"react-router-redux":38,"redux-form":244}],279:[function(require,module,exports){
+},{"../actions":277,"../util/colors":295,"./Input.react":284,"react":220,"react-router-redux":38,"redux-form":244}],279:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -28278,7 +28253,7 @@ var BookFormContainer = (0, _reduxForm.reduxForm)({
 
 exports.default = BookFormContainer;
 
-},{"../actions":277,"../util/colors":294,"./Datepicker.react":283,"./Input.react":284,"react":220,"react-router-redux":38,"redux-form":244}],281:[function(require,module,exports){
+},{"../actions":277,"../util/colors":295,"./Datepicker.react":283,"./Input.react":284,"react":220,"react-router-redux":38,"redux-form":244}],281:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -28439,6 +28414,7 @@ var SearchPanel = function (_React$Component) {
 
         _this.onSearchChange = _this.onSearchChange.bind(_this);
         _this.onClearSearch = _this.onClearSearch.bind(_this);
+
         _this.state = {};
         return _this;
     }
@@ -28454,7 +28430,7 @@ var SearchPanel = function (_React$Component) {
                     'div',
                     { className: 'one-fourth column' },
                     'Filter:  ',
-                    _react2.default.createElement('input', { ref: 'search', name: 'search', type: 'text', value: this.state.search, onChange: this.onSearchChange }),
+                    _react2.default.createElement('input', { ref: 'search', name: 'search', type: 'text', defaultValue: this.props.books.search, value: this.state.search, onChange: this.onSearchChange }),
                     this.state.search ? _react2.default.createElement(
                         'button',
                         { onClick: this.onClearSearch },
@@ -28600,7 +28576,7 @@ exports.default = function (_ref) {
     );
 };
 
-},{"../util/colors":294,"react":220}],285:[function(require,module,exports){
+},{"../util/colors":295,"react":220}],285:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -28964,7 +28940,10 @@ var mapStateToProps = function mapStateToProps(state) {
 
 exports.default = (0, _reactRedux.connect)(mapStateToProps)(NotificationContainer);
 
-},{"../actions":277,"../util/colors":294,"react":220,"react-notification":27,"react-redux":31}],291:[function(require,module,exports){
+},{"../actions":277,"../util/colors":295,"react":220,"react-notification":27,"react-redux":31}],291:[function(require,module,exports){
+"use strict";
+
+},{}],292:[function(require,module,exports){
 'use strict';
 
 var _react = require('react');
@@ -29058,12 +29037,15 @@ var NoMatch = function NoMatch() {
     )
 ), document.getElementById('content'));
 
-},{"./components/AuthorForm.react":278,"./components/AuthorPanel.react":279,"./components/BookForm.react":280,"./components/BookPanel.react":281,"./components/app":288,"./store":293,"react":220,"react-dom":25,"react-redux":31,"react-router":58}],292:[function(require,module,exports){
+},{"./components/AuthorForm.react":278,"./components/AuthorPanel.react":279,"./components/BookForm.react":280,"./components/BookPanel.react":281,"./components/app":288,"./store":294,"react":220,"react-dom":25,"react-redux":31,"react-router":58}],293:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.other = exports.categories = exports.authors = exports.books = exports.ui = exports.notification = undefined;
+
+var _history = require('./history');
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
@@ -29105,12 +29087,18 @@ var ui = exports.ui = function ui() {
     return state;
 };
 
+//http://stackoverflow.com/a/5158301/119071
+function getParameterByName(name) {
+    var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.hash);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
 var BOOKS_INITIAL = {
     rows: [],
     count: 0,
     page: 1,
-    sorting: undefined,
-    search: undefined,
+    sorting: getParameterByName('sorting'),
+    search: getParameterByName('search'),
     book: {}
 };
 var books = exports.books = function books() {
@@ -29237,7 +29225,7 @@ var other = exports.other = function other() {
     return state;
 };
 
-},{}],293:[function(require,module,exports){
+},{"./history":291}],294:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -29249,10 +29237,6 @@ var _reactRouterRedux = require('react-router-redux');
 
 var _reducers = require('./reducers');
 
-var _createHashHistory = require('history/lib/createHashHistory');
-
-var _createHashHistory2 = _interopRequireDefault(_createHashHistory);
-
 var _reduxThunk = require('redux-thunk');
 
 var _reduxThunk2 = _interopRequireDefault(_reduxThunk);
@@ -29261,7 +29245,17 @@ var _redux = require('redux');
 
 var _reduxForm = require('redux-form');
 
+var _createHashHistory = require('history/lib/createHashHistory');
+
+var _createHashHistory2 = _interopRequireDefault(_createHashHistory);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Opt-out of persistent state, not recommended.
+// http://rackt.org/history/stable/HashHistoryCaveats.html
+var history = exports.history = (0, _createHashHistory2.default)({
+    queryKey: false
+});
 
 var reducer = (0, _redux.combineReducers)(Object.assign({}, {
     books: _reducers.books,
@@ -29275,12 +29269,6 @@ var reducer = (0, _redux.combineReducers)(Object.assign({}, {
     form: _reduxForm.reducer
 }));
 
-// Opt-out of persistent state, not recommended.
-// http://rackt.org/history/stable/HashHistoryCaveats.html
-var history = exports.history = (0, _createHashHistory2.default)({
-    queryKey: false
-});
-
 var reduxRouterMiddleware = (0, _reactRouterRedux.syncHistory)(history);
 
 var createStoreWithMiddleware = (0, _redux.compose)((0, _redux.applyMiddleware)(_reduxThunk2.default, reduxRouterMiddleware))(_redux.createStore);
@@ -29289,7 +29277,7 @@ var store = createStoreWithMiddleware(reducer);
 
 exports.default = store;
 
-},{"./reducers":292,"history/lib/createHashHistory":8,"react-router-redux":38,"redux":274,"redux-form":244,"redux-thunk":268}],294:[function(require,module,exports){
+},{"./reducers":293,"history/lib/createHashHistory":8,"react-router-redux":38,"redux":274,"redux-form":244,"redux-thunk":268}],295:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -29301,7 +29289,7 @@ var info = exports.info = '#31b0d5';
 var warning = exports.warning = '#ec971f';
 var danger = exports.danger = '#c9302c';
 
-},{}],295:[function(require,module,exports){
+},{}],296:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -29326,4 +29314,4 @@ var formatUrl = exports.formatUrl = function formatUrl(state) {
     return u;
 };
 
-},{}]},{},[291]);
+},{}]},{},[292]);

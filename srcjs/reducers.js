@@ -1,4 +1,4 @@
-
+import { history } from './history'
 
 export const notification = (state={}, action) => {
     switch (action.type) {
@@ -29,12 +29,19 @@ export const ui = (state={}, action) => {
     return state;
 }
 
+//http://stackoverflow.com/a/5158301/119071
+function getParameterByName(name) {
+    var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.hash);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+
 const BOOKS_INITIAL = {
     rows: [],
     count: 0,
     page: 1,
-    sorting: undefined,
-    search: undefined,
+    sorting: getParameterByName('sorting'),
+    search: getParameterByName('search'),
     book: {},
 }
 export const books = (state=BOOKS_INITIAL, action) => {

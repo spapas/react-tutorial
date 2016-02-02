@@ -203,7 +203,7 @@ export function loadSubCategories(category) {
             dispatch(showSubCategoriesResultAction([]));
             return 
         }
-        let url = `http://127.0.0.1:8000/api/subcategories/?format=json&category=${category}`;
+        let url = `127.0.0.1:8000/api/subcategories/?format=json&category=${category}`;
 
         $.get(url, data => {
             dispatch(showSubCategoriesResultAction(data));

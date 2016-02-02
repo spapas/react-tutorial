@@ -8,16 +8,18 @@ class SearchPanel extends React.Component {
         super()
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onClearSearch = this.onClearSearch.bind(this)
+        
         this.state = {}
     }
     
     render() {
         
+        
         return (
             <div className="row">
                 <div className="one-fourth column">
                     Filter: &nbsp;
-                    <input ref='search' name='search' type='text' value={this.state.search} onChange={this.onSearchChange } />
+                    <input ref='search' name='search' type='text' defaultValue={this.props.books.search} value={this.state.search} onChange={this.onSearchChange } />
                     {this.state.search?<button onClick={this.onClearSearch} >x</button>:''}
                 </div>
             </div>

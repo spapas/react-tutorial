@@ -14,16 +14,6 @@ export const notification = (state={}, action) => {
     return state;
 }
 
-export const filters = (state={}, action) => {
-    switch (action.type) {
-        case 'CHANGE_FILTERS':
-            let { filters } = action
-            return Object.assign({}, state, filters)
-        case 'CLEAR_FILTERS':
-            return {}
-    }
-    return state;
-}
 
 export const ui = (state={}, action) => {
     switch (action.type) {
@@ -34,7 +24,7 @@ export const ui = (state={}, action) => {
             break;
 
         return Object.assign({}, state, {showAddRemarkModal})
-        
+
     }
     return state;
 }
@@ -44,6 +34,7 @@ const BOOKS_INITIAL = {
     count: 0,
     page: 1,
     sorting: undefined,
+    search: undefined,
     book: {},
 }
 export const books = (state=BOOKS_INITIAL, action) => {
@@ -63,12 +54,17 @@ export const books = (state=BOOKS_INITIAL, action) => {
             return Object.assign({}, state, {
                 page: action.page
             });
-            break;    
+            break;
         case 'TOGGLE_SORTING':
             return Object.assign({}, state, {
                 sorting: (state.sorting==action.sorting)?('-'+action.sorting):action.sorting
             });
-            break;    
+            break;
+        case 'CHANGE_SEARCH':
+            return Object.assign({}, state, {
+                search: action.search
+            });
+            break;
 
     }
     return state;
@@ -81,7 +77,6 @@ const AUTHORS_INITIAL = {
 export const authors = (state=AUTHORS_INITIAL, action) => {
     switch (action.type) {
         case 'SHOW_AUTHORS':
-            
             return Object.assign({}, state, {
                 rows: action.authors
             });
@@ -113,14 +108,13 @@ export const categories = (state=CATEGORIES_INITIAL, action) => {
                 subcategories: action.subcategories
             });
             break;
-
     }
     return state;
 }
 
 
 export const other = (state={}, action) => {
-    switch (action.type) {       
+    switch (action.type) {
 
         case 'IS_SUBMITTING':
             return Object.assign({}, state, {
@@ -156,7 +150,7 @@ export const other = (state={}, action) => {
                 })
             });
             break;
-      
+
     }
     return state;
 }

@@ -1,5 +1,5 @@
 import { syncHistory, routeReducer } from 'react-router-redux'
-import { ui, books, notification, filters, categories, authors } from './reducers'
+import { ui, books, notification, categories, authors } from './reducers'
 import createHistory from 'history/lib/createHashHistory'
 
 import thunk from 'redux-thunk';
@@ -10,7 +10,6 @@ import { reducer as formReducer } from 'redux-form';
 const reducer = combineReducers(Object.assign({}, { 
         books, 
         notification,
-        filters,
         ui,
         categories,
         authors,
@@ -25,7 +24,7 @@ const reducer = combineReducers(Object.assign({}, {
 // Opt-out of persistent state, not recommended.
 // http://rackt.org/history/stable/HashHistoryCaveats.html
 export const history = createHistory({
-  queryKey: false
+    queryKey: false
 });
 
 const reduxRouterMiddleware = syncHistory(history)
@@ -35,7 +34,5 @@ const createStoreWithMiddleware = compose(
 )(createStore);
 
 const store = createStoreWithMiddleware(reducer);
-
-reduxRouterMiddleware.listenForReplays(store)
 
 export default store

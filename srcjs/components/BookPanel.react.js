@@ -1,8 +1,9 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import Table from './Table.react'
-import { loadBooks, changePage, toggleSorting } from '../actions'
+import { loadBooks, changePage, toggleSortingAndLoadBooks } from '../actions'
 import PagingPanel from './PagingPanel.react'
+import BookSearchPanel from './BookSearchPanel.react'
 import { Link } from 'react-router'
 
 
@@ -10,11 +11,9 @@ class BookPanel extends React.Component {
     render() {
         let { dispatch } = this.props;
         let { rows, count, page, sorting } = this.props.books;
-        let { isLoading } = this.props.ui;
         
         const sort_method = key => () => {
-            dispatch(toggleSorting(key))
-            dispatch(loadBooks())
+            dispatch(toggleSortingAndLoadBooks(key))
         }
         
         const cols = [
@@ -31,11 +30,11 @@ class BookPanel extends React.Component {
         ]
         
         return <div>
+            <BookSearchPanel />
             <div className="row">
-                {isLoading?<div className="loading">Loading&#8230;</div>:null}
                 <div className="twelve columns">
                     <h3>Book list <Link className='button' to="/book_create/">+</Link></h3>
-                    {isLoading?"...":<Table sorting={sorting} cols={cols} rows={rows} />}
+                    <Table sorting={sorting} cols={cols} rows={rows} />
                 </div>
             </div>
             <PagingPanel count={count} page={page} onNextPage={() => {
@@ -46,20 +45,12 @@ class BookPanel extends React.Component {
                 dispatch(loadBooks())
             }} />
         </div>
-        
-    }
-    
-    componentDidMount() {
-        if(this.props.books.rows.length==0) {
-            this.props.dispatch(loadBooks());
-        }
     }
 }
 
 var mapStateToProps = function(state) {
     return {
         books:state.books,
-        ui:state.ui,
     } 
 };
 

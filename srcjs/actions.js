@@ -1,4 +1,5 @@
-
+import { history } from  './store'
+import { formatUrl } from './util/formatters'
 
 export function showBooksResultAction(jsonResult) {
     return {
@@ -93,27 +94,45 @@ export function hideNotification() {
     }
 }
 
-
-export function changeFilters(filters) {
-    return {
-        type: 'CHANGE_FILTERS',
-        filters
+export function changeSearchAndLoadBooks(search) {
+    return (dispatch, getState) => {
+        dispatch(changeSearch(search))
+        history.push( {
+            search: formatUrl(getState().books)
+        } )
+        dispatch(loadBooks())
     }
 }
 
-export function clearFilters(filters) {
-    return {
-        type: 'CLEAR_FILTERS'
+export function toggleSortingAndLoadBooks(sorting) {
+    return (dispatch, getState) => {
+        dispatch(toggleSorting(sorting))
+        history.push( {
+            search: formatUrl(getState().books)
+        } )
+        dispatch(loadBooks())
     }
 }
+
+
+export function changeSearch(search) {
+    return {
+        type: 'CHANGE_SEARCH',
+        search
+    }
+}
+
 
 export function loadBooks(page=1) {
     return (dispatch, getState) => {
         let state = getState();
-        let { page, sorting} = state.books
+        let { page, sorting, search } = state.books
         let url = `//127.0.0.1:8000/api/books/?format=json&page=${page}`;
         if(sorting) {
             url+=`&ordering=${sorting}`
+        }
+        if(search) {
+            url+=`&search=${search}`
         }
         dispatch(loadingChangedAction(true));
         $.get(url, data => {

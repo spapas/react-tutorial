@@ -1,9 +1,12 @@
 import React from 'react'
 
-import { loadAuthors, loadAuthorAction, showSuccessNotification, showErrorNotification
+import { 
+    loadAuthors, loadAuthorAction, showSuccessNotification, showErrorNotification
 } from '../actions'
 import { reduxForm } from 'redux-form';
 import { routeActions } from 'react-router-redux'
+import Input from './Input.react'
+import { danger } from '../util/colors'
 
 const submit = (id, values, dispatch) => {
     let url = '//127.0.0.1:8000/api/authors/'
@@ -33,8 +36,37 @@ const submit = (id, values, dispatch) => {
             dispatch(showErrorNotification(`Error (${d.status} - ${d.statusText}) while saving: ${d.responseText}` ))
         }
     });
-
 };
+
+
+const del = (id, dispatch) => {
+    const url = `//127.0.0.1:8000/api/authors/${id}/`
+    const type='DELETE';
+    $.ajax({
+        type,
+        url,
+        success: (d) => {
+            dispatch(loadAuthors())
+            dispatch(showSuccessNotification('Success!'))
+            dispatch(routeActions.push('/authors/'));
+
+        },
+        error: (d) => {
+            dispatch(showErrorNotification(`Error (${d.status} - ${d.statusText}) while saving: ${d.responseText}` ))
+        }
+    });
+};
+
+const validate = values => {
+    const errors = {};
+    if (!values.first_name) {
+        errors.first_name = 'Required';
+    }
+    if (!values.last_name) {
+        errors.last_name = 'Required';
+    }
+    return errors;
+}
 
 
 class AuthorForm extends React.Component {
@@ -44,27 +76,27 @@ class AuthorForm extends React.Component {
             first_name, last_name
         }, handleSubmit, dispatch } = this.props;
         const { id } = this.props.params;
-        const { isLoading } = this.props.ui;
         
         const tsubmit = submit.bind(undefined,id);
+        const dsubmit = del.bind(undefined,id, dispatch);
 
         return <form   onSubmit={handleSubmit(tsubmit) }>
-            {isLoading?<div className="loading">Loading&#8230;</div>:null}
             <div className='row'>
                 <div className='six columns'>
-                    <label forHtml='last_name'>Last name</label>
-                    <input type='text' className="u-full-width" {...last_name} />
+                    <Input label='Last Name' field={last_name} />
                 </div>
             
                 <div className='six columns'>
-                    <label forHtml='first_name'>First name</label>
-                    <input type='text' className="u-full-width" {...first_name} />
+                    <Input label='First Name' field={first_name} />
                 </div>
             </div>
             
-            <button className='btn btn-primary' onClick={handleSubmit(tsubmit)}>
-                Αποθήκευση
+            <button className='button button-primary' onClick={handleSubmit(tsubmit)}>
+                Save
             </button>
+            {id?<button className='button button-primary' style={{backgroundColor: danger}} onClick={dsubmit}>
+                Delete
+            </button>:null}
 
         </form>
     }
@@ -91,14 +123,14 @@ const mapStateToProps = (state, props) => {
     
     return {
         author:state.authors.author,
-        ui:state.ui,
         initialValues:initial,
     }
 };
 
 const AuthorFormContainer = reduxForm({
     form: 'authorForm',
-    fields: ['first_name', 'last_name' ]
+    fields: ['first_name', 'last_name' ],
+    validate
 }, mapStateToProps)(AuthorForm);
 
 

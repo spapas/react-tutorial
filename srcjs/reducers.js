@@ -1,4 +1,3 @@
-import { history } from './history'
 
 export const notification = (state={}, action) => {
     switch (action.type) {
@@ -22,9 +21,11 @@ export const ui = (state={}, action) => {
                 isLoading: action.isLoading
             });
             break;
-
-        return Object.assign({}, state, {showAddRemarkModal})
-
+        case 'IS_SUBMITTING':
+            return Object.assign({}, state, {
+                isSubmitting: action.isSubmitting
+            });
+            break;
     }
     return state;
 }
@@ -45,6 +46,7 @@ const BOOKS_INITIAL = {
     book: {},
 }
 export const books = (state=BOOKS_INITIAL, action) => {
+    let idx = 0;
     switch (action.type) {
         case 'SHOW_BOOKS':
             return Object.assign({}, state, {
@@ -72,6 +74,49 @@ export const books = (state=BOOKS_INITIAL, action) => {
                 search: action.search
             });
             break;
+        case 'ADD_BOOK':
+            return Object.assign({}, state, {
+                book: action.book,
+                count: state.count+1,
+                rows: [
+                    ...state.rows,
+                    action.book,
+                ]
+            });
+        case 'UPDATE_BOOK':
+            idx = state.rows.findIndex( r => r.id === action.book.id)
+            if(idx==-1) {
+                return Object.assign({}, state, {
+                    book: action.book
+                });
+            } else {
+                return Object.assign({}, state, {
+                    book: action.book,
+                    rows: [
+                        ...state.rows.slice(0, idx),
+                        action.book,
+                        ...state.rows.slice(idx+1),
+                    ]
+                });
+            }
+            break;
+        case 'DELETE_BOOK':
+            idx = state.rows.findIndex( r => r.id == action.id)
+            if(idx==-1) {
+                return Object.assign({}, state, {
+                    book: undefined
+                });
+            } else {
+                return Object.assign({}, state, {
+                    book: undefined, 
+                    count: state.count-1,
+                    rows: [
+                        ...state.rows.slice(0, idx),
+                        ...state.rows.slice(idx+1),
+                    ]
+                });
+            }
+            break;
 
     }
     return state;
@@ -82,6 +127,7 @@ const AUTHORS_INITIAL = {
     author: {},
 }
 export const authors = (state=AUTHORS_INITIAL, action) => {
+    let idx = 0;
     switch (action.type) {
         case 'SHOW_AUTHORS':
             return Object.assign({}, state, {
@@ -93,7 +139,47 @@ export const authors = (state=AUTHORS_INITIAL, action) => {
                 author: action.author
             });
             break;
-
+        case 'ADD_AUTHOR':
+            return Object.assign({}, state, {
+                author: action.author,
+                rows: [
+                    ...state.rows,
+                    action.author,
+                ]
+            });
+        case 'UPDATE_AUTHOR':
+            idx = state.rows.findIndex( r => r.id === action.author.id)
+            if(idx==-1) {
+                return Object.assign({}, state, {
+                    author: action.author
+                });
+            } else {
+                return Object.assign({}, state, {
+                    author: action.author,
+                    rows: [
+                        ...state.rows.slice(0, idx),
+                        action.author,
+                        ...state.rows.slice(idx+1),
+                    ]
+                });
+            }
+            break;
+        case 'DELETE_AUTHOR':
+            idx = state.rows.findIndex( r => r.id == action.id)
+            if(idx==-1) {
+                return Object.assign({}, state, {
+                    author: undefined
+                });
+            } else {
+                return Object.assign({}, state, {
+                    author: undefined, 
+                    rows: [
+                        ...state.rows.slice(0, idx),
+                        ...state.rows.slice(idx+1),
+                    ]
+                });
+            }
+            break;
     }
     return state;
 }

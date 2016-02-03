@@ -27221,8 +27221,15 @@ function createStore(reducer, initialState, enhancer) {
 
   var currentReducer = reducer;
   var currentState = initialState;
-  var listeners = [];
+  var currentListeners = [];
+  var nextListeners = currentListeners;
   var isDispatching = false;
+
+  function ensureCanMutateNextListeners() {
+    if (nextListeners === currentListeners) {
+      nextListeners = currentListeners.slice();
+    }
+  }
 
   /**
    * Reads the state tree managed by the store.
@@ -27237,9 +27244,21 @@ function createStore(reducer, initialState, enhancer) {
    * Adds a change listener. It will be called any time an action is dispatched,
    * and some part of the state tree may potentially have changed. You may then
    * call `getState()` to read the current state tree inside the callback.
-   * Note, the listener should not expect to see all states changes, as the
-   * state might have been updated multiple times before the listener is
-   * notified.
+   *
+   * You may call `dispatch()` from a change listener, with the following
+   * caveats:
+   *
+   * 1. The subscriptions are snapshotted just before every `dispatch()` call.
+   * If you subscribe or unsubscribe while the listeners are being invoked, this
+   * will not have any effect on the `dispatch()` that is currently in progress.
+   * However, the next `dispatch()` call, whether nested or not, will use a more
+   * recent snapshot of the subscription list.
+   *
+   * 2. The listener should not expect to see all states changes, as the state
+   * might have been updated multiple times during a nested `dispatch()` before
+   * the listener is called. It is, however, guaranteed that all subscribers
+   * registered before the `dispatch()` started will be called with the latest
+   * state by the time it exits.
    *
    * @param {Function} listener A callback to be invoked on every dispatch.
    * @returns {Function} A function to remove this change listener.
@@ -27249,8 +27268,10 @@ function createStore(reducer, initialState, enhancer) {
       throw new Error('Expected listener to be a function.');
     }
 
-    listeners.push(listener);
     var isSubscribed = true;
+
+    ensureCanMutateNextListeners();
+    nextListeners.push(listener);
 
     return function unsubscribe() {
       if (!isSubscribed) {
@@ -27258,8 +27279,10 @@ function createStore(reducer, initialState, enhancer) {
       }
 
       isSubscribed = false;
-      var index = listeners.indexOf(listener);
-      listeners.splice(index, 1);
+
+      ensureCanMutateNextListeners();
+      var index = nextListeners.indexOf(listener);
+      nextListeners.splice(index, 1);
     };
   }
 
@@ -27308,9 +27331,11 @@ function createStore(reducer, initialState, enhancer) {
       isDispatching = false;
     }
 
-    listeners.slice().forEach(function (listener) {
-      return listener();
-    });
+    var listeners = currentListeners = nextListeners;
+    for (var i = 0; i < listeners.length; i++) {
+      listeners[i]();
+    }
+
     return action;
   }
 
@@ -27383,7 +27408,7 @@ var _utilsWarning2 = _interopRequireDefault(_utilsWarning);
 */
 function isCrushed() {}
 
-if (process.env.NODE_ENV !== 'production' && setInterval.name === 'setInterval' && isCrushed.name !== 'isCrushed') {
+if (process.env.NODE_ENV !== 'production' && typeof isCrushed.name === 'string' && isCrushed.name !== 'isCrushed') {
   _utilsWarning2['default']('You are currently using minified code outside of NODE_ENV === \'production\'. ' + 'This means that you are running a slower development build of Redux. ' + 'You can use loose-envify (https://github.com/zertosh/loose-envify) for browserify ' + 'or DefinePlugin for webpack (http://stackoverflow.com/questions/30030031) ' + 'to ensure you have the correct code for your production build.');
 }
 
@@ -27461,8 +27486,14 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.showBooksResultAction = showBooksResultAction;
 exports.showBookResultAction = showBookResultAction;
+exports.addBookResultAction = addBookResultAction;
+exports.updateBookResultAction = updateBookResultAction;
+exports.deleteBookResultAction = deleteBookResultAction;
 exports.showAuthorsResultAction = showAuthorsResultAction;
 exports.showAuthorResultAction = showAuthorResultAction;
+exports.addAuthorResultAction = addAuthorResultAction;
+exports.updateAuthorResultAction = updateAuthorResultAction;
+exports.deleteAuthorResultAction = deleteAuthorResultAction;
 exports.showCategoriesResultAction = showCategoriesResultAction;
 exports.showSubCategoriesResultAction = showSubCategoriesResultAction;
 exports.loadingChangedAction = loadingChangedAction;
@@ -27500,6 +27531,27 @@ function showBookResultAction(jsonResult) {
     };
 }
 
+function addBookResultAction(book) {
+    return {
+        type: "ADD_BOOK",
+        book: book
+    };
+}
+
+function updateBookResultAction(book) {
+    return {
+        type: "UPDATE_BOOK",
+        book: book
+    };
+}
+
+function deleteBookResultAction(id) {
+    return {
+        type: "DELETE_BOOK",
+        id: id
+    };
+}
+
 function showAuthorsResultAction(jsonResult) {
     return {
         type: "SHOW_AUTHORS",
@@ -27507,10 +27559,31 @@ function showAuthorsResultAction(jsonResult) {
     };
 }
 
-function showAuthorResultAction(jsonResult) {
+function showAuthorResultAction(author) {
     return {
         type: "SHOW_AUTHOR",
-        author: jsonResult
+        author: author
+    };
+}
+
+function addAuthorResultAction(author) {
+    return {
+        type: "ADD_AUTHOR",
+        author: author
+    };
+}
+
+function updateAuthorResultAction(author) {
+    return {
+        type: "UPDATE_AUTHOR",
+        author: author
+    };
+}
+
+function deleteAuthorResultAction(id) {
+    return {
+        type: "DELETE_AUTHOR",
+        id: id
     };
 }
 
@@ -27691,7 +27764,7 @@ function loadSubCategories(category) {
             dispatch(showSubCategoriesResultAction([]));
             return;
         }
-        var url = '127.0.0.1:8000/api/subcategories/?format=json&category=' + category;
+        var url = '//127.0.0.1:8000/api/subcategories/?format=json&category=' + category;
 
         $.get(url, function (data) {
             dispatch(showSubCategoriesResultAction(data));
@@ -27741,17 +27814,23 @@ var submit = function submit(id, values, dispatch) {
         type = 'PUT';
     }
 
+    dispatch((0, _actions.submittingChangedAction)(true));
+
     $.ajax({
         type: type,
         url: url,
         data: values,
         success: function success(d) {
-
-            // TODO: This returns the modified object - should be used instead of "reloading"
-            //dispatch(submittingChangedAction(false))
-            dispatch((0, _actions.loadAuthors)());
-            dispatch((0, _actions.showSuccessNotification)('Success!'));
-            dispatch(_reactRouterRedux.routeActions.push('/authors/'));
+            setTimeout(function () {
+                dispatch((0, _actions.showSuccessNotification)('Success!'));
+                if (id) {
+                    dispatch((0, _actions.updateAuthorResultAction)(d));
+                } else {
+                    dispatch((0, _actions.addAuthorResultAction)(d));
+                }
+                dispatch((0, _actions.submittingChangedAction)(false));
+                dispatch(_reactRouterRedux.routeActions.push('/authors/'));
+            }, 500);
         },
         error: function error(d) {
             //dispatch(submittingChangedAction(false))
@@ -27764,13 +27843,17 @@ var submit = function submit(id, values, dispatch) {
 var del = function del(id, dispatch) {
     var url = '//127.0.0.1:8000/api/authors/' + id + '/';
     var type = 'DELETE';
+    dispatch((0, _actions.submittingChangedAction)(true));
     $.ajax({
         type: type,
         url: url,
         success: function success(d) {
-            dispatch((0, _actions.loadAuthors)());
-            dispatch((0, _actions.showSuccessNotification)('Success!'));
-            dispatch(_reactRouterRedux.routeActions.push('/authors/'));
+            setTimeout(function () {
+                dispatch((0, _actions.showSuccessNotification)('Success!'));
+                dispatch((0, _actions.deleteAuthorResultAction)(id));
+                dispatch((0, _actions.submittingChangedAction)(false));
+                dispatch(_reactRouterRedux.routeActions.push('/authors/'));
+            }, 500);
         },
         error: function error(d) {
             dispatch((0, _actions.showErrorNotification)('Error (' + d.status + ' - ' + d.statusText + ') while saving: ' + d.responseText));
@@ -27808,6 +27891,7 @@ var AuthorForm = function (_React$Component) {
             var handleSubmit = _props.handleSubmit;
             var dispatch = _props.dispatch;
             var id = this.props.params.id;
+            var isSubmitting = this.props.ui.isSubmitting;
 
             var tsubmit = submit.bind(undefined, id);
             var dsubmit = del.bind(undefined, id, dispatch);
@@ -27831,12 +27915,12 @@ var AuthorForm = function (_React$Component) {
                 ),
                 _react2.default.createElement(
                     'button',
-                    { className: 'button button-primary', onClick: handleSubmit(tsubmit) },
+                    { disabled: isSubmitting, className: 'button button-primary', onClick: handleSubmit(tsubmit) },
                     'Save'
                 ),
                 id ? _react2.default.createElement(
                     'button',
-                    { className: 'button button-primary', style: { backgroundColor: _colors.danger }, onClick: dsubmit },
+                    { disabled: isSubmitting, type: 'button', className: 'button button-primary', style: { backgroundColor: _colors.danger }, onClick: dsubmit },
                     'Delete'
                 ) : null
             );
@@ -27869,6 +27953,7 @@ var mapStateToProps = function mapStateToProps(state, props) {
 
     return {
         author: state.authors.author,
+        ui: state.ui,
         initialValues: initial
     };
 };
@@ -27946,7 +28031,7 @@ var AuthorPanel = function (_React$Component) {
                         'Author list ',
                         _react2.default.createElement(
                             _reactRouter.Link,
-                            { className: 'button', to: '/author_create/' },
+                            { className: 'button button-primary', style: { fontSize: '1em' }, to: '/author_create/' },
                             '+'
                         )
                     ),
@@ -27967,7 +28052,7 @@ var mapStateToProps = function mapStateToProps(state) {
 
 exports.default = (0, _reactRedux.connect)(mapStateToProps)(AuthorPanel);
 
-},{"./Table.react":287,"react":220,"react-redux":31,"react-router":58}],280:[function(require,module,exports){
+},{"./Table.react":288,"react":220,"react-redux":31,"react-router":58}],280:[function(require,module,exports){
 'use strict';
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -27996,6 +28081,10 @@ var _Input = require('./Input.react');
 
 var _Input2 = _interopRequireDefault(_Input);
 
+var _Select = require('./Select.react');
+
+var _Select2 = _interopRequireDefault(_Select);
+
 var _colors = require('../util/colors');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -28007,7 +28096,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var submit = function submit(id, values, dispatch) {
-    console.log(values);
     var url = '//127.0.0.1:8000/api/books/';
     var type = 'POST';
 
@@ -28021,12 +28109,12 @@ var submit = function submit(id, values, dispatch) {
         url: url,
         data: values,
         success: function success(d) {
-
-            // TODO: This returns the modified object - should be used instead of "reloading"
-            //dispatch(submittingChangedAction(false))
-            dispatch((0, _actions.loadBooks)());
-
             dispatch((0, _actions.showSuccessNotification)('Success!'));
+            if (id) {
+                dispatch((0, _actions.updateBookResultAction)(d));
+            } else {
+                dispatch((0, _actions.addBookResultAction)(d));
+            }
             dispatch(_reactRouterRedux.routeActions.push('/'));
         },
         error: function error(d) {
@@ -28044,8 +28132,9 @@ var del = function del(id, dispatch) {
         type: type,
         url: url,
         success: function success(d) {
-            dispatch((0, _actions.loadBooks)());
+
             dispatch((0, _actions.showSuccessNotification)('Success!'));
+            dispatch((0, _actions.deleteBookResultAction)(id));
             dispatch(_reactRouterRedux.routeActions.push('/'));
         },
         error: function error(d) {
@@ -28084,6 +28173,7 @@ var BookForm = function (_React$Component) {
             var handleSubmit = _props.handleSubmit;
             var dispatch = _props.dispatch;
             var id = this.props.params.id;
+            var isSubmitting = this.props.ui.isSubmitting;
             var _props$categories = this.props.categories;
             var categories = _props$categories.categories;
             var subcategories = _props$categories.subcategories;
@@ -28111,47 +28201,15 @@ var BookForm = function (_React$Component) {
                     _react2.default.createElement(
                         'div',
                         { className: 'six columns' },
-                        _react2.default.createElement(
-                            'label',
-                            { forHtml: 'category' },
-                            'Category'
-                        ),
-                        _react2.default.createElement(
-                            'select',
-                            _extends({ type: 'text', className: 'u-full-width' }, category, { onChange: function onChange(event) {
-                                    category.onChange(event);
-                                    dispatch((0, _actions.loadSubCategories)(event.target.value));
-                                } }),
-                            _react2.default.createElement('option', null),
-                            categories.map(function (c) {
-                                return _react2.default.createElement(
-                                    'option',
-                                    { value: c.id, key: c.id },
-                                    c.name
-                                );
-                            })
-                        )
+                        _react2.default.createElement(_Select2.default, { label: 'Category', field: category, options: categories, onChange: function onChange(event) {
+                                category.onChange(event);
+                                dispatch((0, _actions.loadSubCategories)(event.target.value));
+                            } })
                     ),
                     _react2.default.createElement(
                         'div',
                         { className: 'six columns' },
-                        _react2.default.createElement(
-                            'label',
-                            { forHtml: 'subcategory' },
-                            'Subcategory'
-                        ),
-                        _react2.default.createElement(
-                            'select',
-                            _extends({ type: 'text', className: 'u-full-width' }, subcategory),
-                            _react2.default.createElement('option', null),
-                            subcategories.map(function (c) {
-                                return _react2.default.createElement(
-                                    'option',
-                                    { value: c.id, key: c.id },
-                                    c.name
-                                );
-                            })
-                        )
+                        _react2.default.createElement(_Select2.default, { label: 'Subcategory', field: subcategory, options: subcategories })
                     )
                 ),
                 _react2.default.createElement(
@@ -28193,12 +28251,12 @@ var BookForm = function (_React$Component) {
                 ),
                 _react2.default.createElement(
                     'button',
-                    { className: 'button button-primary', onClick: handleSubmit(tsubmit) },
+                    { disabled: isSubmitting, className: 'button button-primary', onClick: handleSubmit(tsubmit) },
                     'Save'
                 ),
                 id ? _react2.default.createElement(
                     'button',
-                    { className: 'button button-primary', style: { backgroundColor: _colors.danger }, onClick: dsubmit },
+                    { disabled: isSubmitting, type: 'button', className: 'button button-primary', style: { backgroundColor: _colors.danger }, onClick: dsubmit },
                     'Delete'
                 ) : null
             );
@@ -28208,10 +28266,6 @@ var BookForm = function (_React$Component) {
         value: function componentDidMount() {
             if (this.props.categories.categories.length == 0) {
                 this.props.dispatch((0, _actions.loadCategories)());
-            }
-
-            if (this.props.authors.rows.length == 0) {
-                this.props.dispatch((0, _actions.loadAuthors)());
             }
 
             if (this.props.params.id) {
@@ -28241,6 +28295,7 @@ var mapStateToProps = function mapStateToProps(state, props) {
         book: state.books.book,
         categories: state.categories,
         authors: state.authors,
+        ui: state.ui,
         initialValues: initial
     };
 };
@@ -28253,7 +28308,7 @@ var BookFormContainer = (0, _reduxForm.reduxForm)({
 
 exports.default = BookFormContainer;
 
-},{"../actions":277,"../util/colors":295,"./Datepicker.react":283,"./Input.react":284,"react":220,"react-router-redux":38,"redux-form":244}],281:[function(require,module,exports){
+},{"../actions":277,"../util/colors":295,"./Datepicker.react":283,"./Input.react":284,"./Select.react":286,"react":220,"react-router-redux":38,"redux-form":244}],281:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -28346,7 +28401,7 @@ var BookPanel = function (_React$Component) {
                             'Book list ',
                             _react2.default.createElement(
                                 _reactRouter.Link,
-                                { className: 'button', to: '/book_create/' },
+                                { className: 'button button-primary', style: { fontSize: '1em' }, to: '/book_create/' },
                                 '+'
                             )
                         ),
@@ -28375,7 +28430,7 @@ var mapStateToProps = function mapStateToProps(state) {
 
 exports.default = (0, _reactRedux.connect)(mapStateToProps)(BookPanel);
 
-},{"../actions":277,"./BookSearchPanel.react":282,"./PagingPanel.react":285,"./Table.react":287,"react":220,"react-redux":31,"react-router":58}],282:[function(require,module,exports){
+},{"../actions":277,"./BookSearchPanel.react":282,"./PagingPanel.react":285,"./Table.react":288,"react":220,"react-redux":31,"react-router":58}],282:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -28635,6 +28690,60 @@ exports.default = function (_ref) {
 };
 
 },{"../actions":277,"react":220}],286:[function(require,module,exports){
+'use strict';
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _colors = require('../util/colors');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+exports.default = function (_ref) {
+    var field = _ref.field;
+    var label = _ref.label;
+    var options = _ref.options;
+
+    var props = _objectWithoutProperties(_ref, ['field', 'label', 'options']);
+
+    return _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(
+            'label',
+            { forHtml: 'field.name' },
+            label
+        ),
+        _react2.default.createElement(
+            'select',
+            _extends({ type: 'text', className: 'u-full-width' }, field, props),
+            _react2.default.createElement('option', null),
+            options.map(function (c) {
+                return _react2.default.createElement(
+                    'option',
+                    { value: c.id, key: c.id },
+                    c.name
+                );
+            })
+        ),
+        field.touched && field.error && _react2.default.createElement(
+            'div',
+            { style: { color: 'white', backgroundColor: _colors.danger } },
+            field.error
+        )
+    );
+};
+
+},{"../util/colors":295,"react":220}],287:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28668,7 +28777,7 @@ exports.default = function (_ref) {
     );
 };
 
-},{"react":220}],287:[function(require,module,exports){
+},{"react":220}],288:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -28730,7 +28839,7 @@ exports.default = function (props) {
     );
 };
 
-},{"react":220}],288:[function(require,module,exports){
+},{"react":220}],289:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -28781,8 +28890,6 @@ var App = function (_React$Component) {
     _createClass(App, [{
         key: 'render',
         value: function render() {
-            var bookLength = this.props.books.count;
-            var authorLength = this.props.authors.rows.length;
             var isLoading = this.props.ui.isLoading;
 
             return _react2.default.createElement(
@@ -28792,7 +28899,7 @@ var App = function (_React$Component) {
                 _react2.default.createElement(_notification2.default, null),
                 _react2.default.createElement(_loading2.default, { isLoading: isLoading }),
                 _react2.default.createElement('br', null),
-                _react2.default.createElement(_StatPanel2.default, { bookLength: bookLength, authorLength: authorLength }),
+                _react2.default.createElement(_StatPanel2.default, { bookLength: this.props.books.count, authorLength: this.props.authors.rows.length }),
                 _react2.default.createElement(
                     _reactRouter.Link,
                     { className: 'button', to: '/' },
@@ -28830,7 +28937,7 @@ var mapStateToProps = function mapStateToProps(state) {
 
 exports.default = (0, _reactRedux.connect)(mapStateToProps)(App);
 
-},{"../actions":277,"./StatPanel.react":286,"./loading.react":289,"./notification":290,"react":220,"react-redux":31,"react-router":58}],289:[function(require,module,exports){
+},{"../actions":277,"./StatPanel.react":287,"./loading.react":290,"./notification":291,"react":220,"react-redux":31,"react-router":58}],290:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -28856,7 +28963,7 @@ exports.default = function (_ref) {
     );
 };
 
-},{"react":220}],290:[function(require,module,exports){
+},{"react":220}],291:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -28940,10 +29047,7 @@ var mapStateToProps = function mapStateToProps(state) {
 
 exports.default = (0, _reactRedux.connect)(mapStateToProps)(NotificationContainer);
 
-},{"../actions":277,"../util/colors":295,"react":220,"react-notification":27,"react-redux":31}],291:[function(require,module,exports){
-"use strict";
-
-},{}],292:[function(require,module,exports){
+},{"../actions":277,"../util/colors":295,"react":220,"react-notification":27,"react-redux":31}],292:[function(require,module,exports){
 'use strict';
 
 var _react = require('react');
@@ -29037,19 +29141,16 @@ var NoMatch = function NoMatch() {
     )
 ), document.getElementById('content'));
 
-},{"./components/AuthorForm.react":278,"./components/AuthorPanel.react":279,"./components/BookForm.react":280,"./components/BookPanel.react":281,"./components/app":288,"./store":294,"react":220,"react-dom":25,"react-redux":31,"react-router":58}],293:[function(require,module,exports){
+},{"./components/AuthorForm.react":278,"./components/AuthorPanel.react":279,"./components/BookForm.react":280,"./components/BookPanel.react":281,"./components/app":289,"./store":294,"react":220,"react-dom":25,"react-redux":31,"react-router":58}],293:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.other = exports.categories = exports.authors = exports.books = exports.ui = exports.notification = undefined;
-
-var _history = require('./history');
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var notification = exports.notification = function notification() {
     var state = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
@@ -29080,9 +29181,11 @@ var ui = exports.ui = function ui() {
                 isLoading: action.isLoading
             });
             break;
-
-            return Object.assign({}, state, { showAddRemarkModal: showAddRemarkModal });
-
+        case 'IS_SUBMITTING':
+            return Object.assign({}, state, {
+                isSubmitting: action.isSubmitting
+            });
+            break;
     }
     return state;
 };
@@ -29105,6 +29208,7 @@ var books = exports.books = function books() {
     var state = arguments.length <= 0 || arguments[0] === undefined ? BOOKS_INITIAL : arguments[0];
     var action = arguments[1];
 
+    var idx = 0;
     switch (action.type) {
         case 'SHOW_BOOKS':
             return Object.assign({}, state, {
@@ -29132,6 +29236,43 @@ var books = exports.books = function books() {
                 search: action.search
             });
             break;
+        case 'ADD_BOOK':
+            return Object.assign({}, state, {
+                book: action.book,
+                count: state.count + 1,
+                rows: [].concat(_toConsumableArray(state.rows), [action.book])
+            });
+        case 'UPDATE_BOOK':
+            idx = state.rows.findIndex(function (r) {
+                return r.id === action.book.id;
+            });
+            if (idx == -1) {
+                return Object.assign({}, state, {
+                    book: action.book
+                });
+            } else {
+                return Object.assign({}, state, {
+                    book: action.book,
+                    rows: [].concat(_toConsumableArray(state.rows.slice(0, idx)), [action.book], _toConsumableArray(state.rows.slice(idx + 1)))
+                });
+            }
+            break;
+        case 'DELETE_BOOK':
+            idx = state.rows.findIndex(function (r) {
+                return r.id == action.id;
+            });
+            if (idx == -1) {
+                return Object.assign({}, state, {
+                    book: undefined
+                });
+            } else {
+                return Object.assign({}, state, {
+                    book: undefined,
+                    count: state.count - 1,
+                    rows: [].concat(_toConsumableArray(state.rows.slice(0, idx)), _toConsumableArray(state.rows.slice(idx + 1)))
+                });
+            }
+            break;
 
     }
     return state;
@@ -29145,6 +29286,7 @@ var authors = exports.authors = function authors() {
     var state = arguments.length <= 0 || arguments[0] === undefined ? AUTHORS_INITIAL : arguments[0];
     var action = arguments[1];
 
+    var idx = 0;
     switch (action.type) {
         case 'SHOW_AUTHORS':
             return Object.assign({}, state, {
@@ -29156,7 +29298,41 @@ var authors = exports.authors = function authors() {
                 author: action.author
             });
             break;
-
+        case 'ADD_AUTHOR':
+            return Object.assign({}, state, {
+                author: action.author,
+                rows: [].concat(_toConsumableArray(state.rows), [action.author])
+            });
+        case 'UPDATE_AUTHOR':
+            idx = state.rows.findIndex(function (r) {
+                return r.id === action.author.id;
+            });
+            if (idx == -1) {
+                return Object.assign({}, state, {
+                    author: action.author
+                });
+            } else {
+                return Object.assign({}, state, {
+                    author: action.author,
+                    rows: [].concat(_toConsumableArray(state.rows.slice(0, idx)), [action.author], _toConsumableArray(state.rows.slice(idx + 1)))
+                });
+            }
+            break;
+        case 'DELETE_AUTHOR':
+            idx = state.rows.findIndex(function (r) {
+                return r.id == action.id;
+            });
+            if (idx == -1) {
+                return Object.assign({}, state, {
+                    author: undefined
+                });
+            } else {
+                return Object.assign({}, state, {
+                    author: undefined,
+                    rows: [].concat(_toConsumableArray(state.rows.slice(0, idx)), _toConsumableArray(state.rows.slice(idx + 1)))
+                });
+            }
+            break;
     }
     return state;
 };
@@ -29225,7 +29401,7 @@ var other = exports.other = function other() {
     return state;
 };
 
-},{"./history":291}],294:[function(require,module,exports){
+},{}],294:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -29300,7 +29476,6 @@ var formatUrl = exports.formatUrl = function formatUrl(state) {
     var sorting = state.sorting;
 
     var u = '';
-    console.log(state);
     if (search || sorting) {
         u += '?';
         if (search) {

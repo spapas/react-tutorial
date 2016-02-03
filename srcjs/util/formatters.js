@@ -3,7 +3,6 @@
 export const formatUrl = (state) => {
     let { search, sorting } = state;
     let u = ''
-    console.log(state)
     if( search || sorting) {
         u += '?'
         if(search) {

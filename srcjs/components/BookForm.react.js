@@ -1,16 +1,16 @@
 import React from 'react'
 
-import { loadBooks, loadAuthors, loadBookAction, showSuccessNotification, 
+import { addBookResultAction, updateBookResultAction, deleteBookResultAction, loadBookAction, showSuccessNotification, 
     showErrorNotification, loadCategories, loadSubCategories
 } from '../actions'
 import { reduxForm } from 'redux-form';
 import { routeActions } from 'react-router-redux'
 import DatePicker from './Datepicker.react'
 import Input from './Input.react'
+import Select from './Select.react'
 import { danger } from '../util/colors'
 
 const submit = (id, values, dispatch) => {
-    console.log(values)
     let url = '//127.0.0.1:8000/api/books/'
     let type = 'POST'
 
@@ -24,12 +24,12 @@ const submit = (id, values, dispatch) => {
         url,
         data: values,
         success: (d) => {
-            
-            // TODO: This returns the modified object - should be used instead of "reloading"
-            //dispatch(submittingChangedAction(false))
-            dispatch(loadBooks())
-            
             dispatch(showSuccessNotification('Success!'))
+            if(id) {
+                dispatch(updateBookResultAction(d))
+            } else {
+                dispatch(addBookResultAction(d))
+            }
             dispatch(routeActions.push('/'));
 
         },
@@ -48,8 +48,9 @@ const del = (id, dispatch) => {
         type,
         url,
         success: (d) => {
-            dispatch(loadBooks())
+            
             dispatch(showSuccessNotification('Success!'))
+            dispatch(deleteBookResultAction(id))
             dispatch(routeActions.push('/'));
 
         },
@@ -75,6 +76,7 @@ class BookForm extends React.Component {
             title, category, subcategory, publish_date, author
         }, handleSubmit, dispatch } = this.props;
         const { id } = this.props.params;
+        const { isSubmitting } = this.props.ui;
         const { categories, subcategories } = this.props.categories;
         const authors = this.props.authors.rows;
         
@@ -90,21 +92,13 @@ class BookForm extends React.Component {
             </div>
             <div className='row'>
                 <div className='six columns'>
-                    <label forHtml='category'>Category</label>
-                    <select type='text' className="u-full-width" {...category} onChange={ event => {
+                    <Select label='Category' field={category} options={categories} onChange={ event => {
                         category.onChange(event);
                         dispatch(loadSubCategories(event.target.value))
-                    }}>
-                        <option></option>
-                        {categories.map(c => <option value={c.id} key={c.id} >{c.name}</option>)}
-                    </select>
+                    }}/>
                 </div>
                 <div className='six columns'>
-                    <label forHtml='subcategory'>Subcategory</label>
-                    <select type='text' className="u-full-width" {...subcategory} >
-                        <option></option>
-                        {subcategories.map(c => <option value={c.id} key={c.id} >{c.name}</option>)}
-                    </select>
+                    <Select label='Subcategory' field={subcategory} options={subcategories} />
                 </div>
             </div>
             
@@ -122,10 +116,10 @@ class BookForm extends React.Component {
                 </div>
             </div>
             
-            <button className='button button-primary' onClick={handleSubmit(tsubmit)}>
+            <button disabled={isSubmitting} className='button button-primary' onClick={handleSubmit(tsubmit)}>
                 Save
             </button> 
-            {id?<button className='button button-primary' style={{backgroundColor: danger}} onClick={dsubmit}>
+            {id?<button disabled={isSubmitting} type='button' className='button button-primary' style={{backgroundColor: danger}} onClick={dsubmit}>
                 Delete
             </button>:null}
 
@@ -135,10 +129,6 @@ class BookForm extends React.Component {
     componentDidMount() {
         if(this.props.categories.categories.length==0) {
             this.props.dispatch(loadCategories());
-        }
-        
-        if(this.props.authors.rows.length==0) {
-            this.props.dispatch(loadAuthors());
         }
         
         if (this.props.params.id) {
@@ -164,6 +154,7 @@ const mapStateToProps = (state, props) => {
         book:state.books.book,
         categories:state.categories,
         authors:state.authors,
+        ui:state.ui,
         initialValues:initial,
     }
 };

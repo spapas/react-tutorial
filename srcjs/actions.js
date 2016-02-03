@@ -15,6 +15,28 @@ export function showBookResultAction(jsonResult) {
     };
 }
 
+
+export function addBookResultAction(book) {
+    return {
+        type: "ADD_BOOK",
+        book
+    };
+}
+
+export function updateBookResultAction(book) {
+    return {
+        type: "UPDATE_BOOK",
+        book
+    };
+}
+
+export function deleteBookResultAction(id) {
+    return {
+        type: "DELETE_BOOK",
+        id
+    };
+}
+
 export function showAuthorsResultAction(jsonResult) {
     return {
         type: "SHOW_AUTHORS",
@@ -22,13 +44,33 @@ export function showAuthorsResultAction(jsonResult) {
     };
 }
 
-export function showAuthorResultAction(jsonResult) {
+export function showAuthorResultAction(author) {
     return {
         type: "SHOW_AUTHOR",
-        author: jsonResult
+        author
     };
 }
 
+export function addAuthorResultAction(author) {
+    return {
+        type: "ADD_AUTHOR",
+        author
+    };
+}
+
+export function updateAuthorResultAction(author) {
+    return {
+        type: "UPDATE_AUTHOR",
+        author
+    };
+}
+
+export function deleteAuthorResultAction(id) {
+    return {
+        type: "DELETE_AUTHOR",
+        id
+    };
+}
 
 export function showCategoriesResultAction(jsonResult) {
     return {
@@ -203,7 +245,7 @@ export function loadSubCategories(category) {
             dispatch(showSubCategoriesResultAction([]));
             return 
         }
-        let url = `127.0.0.1:8000/api/subcategories/?format=json&category=${category}`;
+        let url = `//127.0.0.1:8000/api/subcategories/?format=json&category=${category}`;
 
         $.get(url, data => {
             dispatch(showSubCategoriesResultAction(data));

@@ -9,10 +9,7 @@ import StatPanel from './StatPanel.react'
 class App extends React.Component {
 
     render() {
-        const bookLength = this.props.books.count;
-        const authorLength = this.props.authors.rows.length;
         const { isLoading } = this.props.ui;
-
         return <div>
 
             {this.props.children}
@@ -23,7 +20,7 @@ class App extends React.Component {
             <br />
 
 
-            <StatPanel bookLength={bookLength} authorLength={authorLength} />
+            <StatPanel bookLength={this.props.books.count} authorLength={this.props.authors.rows.length} />
             <Link className='button' to="/">Books</Link>
             <Link className='button' to="/authors/">Authors</Link>
 

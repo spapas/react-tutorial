@@ -33,7 +33,7 @@ class BookPanel extends React.Component {
             <BookSearchPanel />
             <div className="row">
                 <div className="twelve columns">
-                    <h3>Book list <Link className='button' to="/book_create/">+</Link></h3>
+                    <h3>Book list <Link className='button button-primary' style={{fontSize:'1em'}} to="/book_create/">+</Link></h3>
                     <Table sorting={sorting} cols={cols} rows={rows} />
                 </div>
             </div>

@@ -17,7 +17,7 @@ class AuthorPanel extends React.Component {
         return(
             <div className="row">
                 <div className="twelve columns">
-                    <h3>Author list <Link className='button' to="/author_create/">+</Link></h3>
+                    <h3>Author list <Link className='button button-primary' style={{fontSize:'1em'}} to="/author_create/">+</Link></h3>
                     <Table cols={cols} rows={rows} />
                 </div>
             </div>

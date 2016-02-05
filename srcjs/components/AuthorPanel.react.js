@@ -11,9 +11,9 @@ const cols = [
 
 class AuthorPanel extends React.Component {
     render() {
-        
+        console.log("RENDERING AP");
         let { rows, count } = this.props.authors;
-        
+
         return(
             <div className="row">
                 <div className="twelve columns">
@@ -28,7 +28,7 @@ class AuthorPanel extends React.Component {
 var mapStateToProps = function(state) {
     return {
         authors:state.authors,
-    } 
+    }
 };
 
 export default connect(mapStateToProps)(AuthorPanel);

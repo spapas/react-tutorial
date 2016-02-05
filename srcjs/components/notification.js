@@ -7,28 +7,29 @@ import * as colors from '../util/colors'
 
 const NotificationContainer = (props) => {
     let { message, notification_type } = props.notification;
+    let { onHide } = props;
     let isActive = message?true:false;
-    let color = 'blue';
-    
+    let color;
+
     switch(notification_type) {
         case 'SUCCESS':
             color = colors.success
-            break; 
+            break;
         case 'ERROR':
             color = colors.danger
-            break; 
+            break;
         case 'INFO':
             color = colors.info
-            break; 
+            break;
     }
-    
+
     return <Notification
         isActive={isActive}
         message={message?message:''}
         dismissAfter={5000}
-        onDismiss={ ()=>props.dispatch(hideNotification()) }
+        onDismiss={ ()=>onHide() }
         action='X'
-        onClick={ ()=>props.dispatch(hideNotification()) }
+        onClick={ ()=>onHide() }
         style={{
             bar: {
                 background: color,
@@ -45,13 +46,21 @@ const NotificationContainer = (props) => {
             }
         }}
     />
-}                
-         
+}
 
-var mapStateToProps = function(state) {
+
+var mapStateToProps = (state, ownProps) => {
     return {
-        notification:state.notification
-    } 
+        notification: state.notification
+    }
 };
 
-export default connect(mapStateToProps)(NotificationContainer);
+var mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        onHide: () => {
+            dispatch(hideNotification())
+        }
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(NotificationContainer);

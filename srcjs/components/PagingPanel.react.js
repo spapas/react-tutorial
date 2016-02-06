@@ -1,7 +1,6 @@
 import React from 'react';
-import { changePage, loadBooks } from '../actions' 
 
-export default ({page=1, page_size=5, count, dispatch, onNextPage, onPreviousPage, ...props}) => {
+export default ({page=1, page_size=5, count, onNextPage, onPreviousPage, ...props}) => {
     let total_pages = Math.ceil(count / page_size);
     
     return(

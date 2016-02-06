@@ -49,13 +49,13 @@ const NotificationContainer = (props) => {
 }
 
 
-var mapStateToProps = (state, ownProps) => {
+let mapStateToProps = (state, ownProps) => {
     return {
         notification: state.notification
     }
 };
 
-var mapDispatchToProps = (dispatch, ownProps) => {
+let mapDispatchToProps = (dispatch, ownProps) => {
     return {
         onHide: () => {
             dispatch(hideNotification())

@@ -1,9 +1,9 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import Table from './Table.react'
+import Table from './Table'
 import { loadBooks, changePage, toggleSortingAndLoadBooks } from '../actions'
-import PagingPanel from './PagingPanel.react'
-import BookSearchPanel from './BookSearchPanel.react'
+import PagingPanel from './PagingPanel'
+import BookSearchPanel from './BookSearchPanel'
 import { Link } from 'react-router'
 
 

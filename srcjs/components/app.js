@@ -3,8 +3,8 @@ import { Link } from 'react-router'
 import { connect } from 'react-redux'
 import { loadBooks, loadAuthors } from '../actions'
 import NotificationContainer from './notification';
-import LoadingContainer from './loading.react';
-import StatPanel from './StatPanel.react'
+import LoadingContainer from './loading';
+import StatPanel from './StatPanel'
 
 class App extends React.Component {
 

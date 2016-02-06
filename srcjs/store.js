@@ -11,7 +11,6 @@ import createHistory from 'history/lib/createHashHistory'
 export const history = createHistory({
     queryKey: false
 });
-       
 
 const reducer = combineReducers(Object.assign({}, { 
         books, 
@@ -25,8 +24,6 @@ const reducer = combineReducers(Object.assign({}, {
         form: formReducer     
     })
 )
-
-
 
 const reduxRouterMiddleware = syncHistory(history)
 

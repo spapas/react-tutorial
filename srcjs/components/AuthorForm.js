@@ -6,7 +6,7 @@ import {
 } from '../actions'
 import { reduxForm } from 'redux-form';
 import { routeActions } from 'react-router-redux'
-import Input from './Input.react'
+import Input from './Input'
 import { danger } from '../util/colors'
 
 const submit = (id, values, dispatch) => {

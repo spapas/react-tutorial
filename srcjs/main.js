@@ -8,10 +8,10 @@ import store from './store'
 import { history } from './store'
 
 import App from './components/app';
-import BookPanel from './components/BookPanel.react';
-import AuthorPanel from './components/AuthorPanel.react';
-import BookForm from './components/BookForm.react';
-import AuthorForm from './components/AuthorForm.react';
+import BookPanel from './components/BookPanel';
+import AuthorPanel from './components/AuthorPanel';
+import BookForm from './components/BookForm';
+import AuthorForm from './components/AuthorForm';
 
 const About = () => {
     return <div>

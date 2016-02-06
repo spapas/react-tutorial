@@ -5,9 +5,9 @@ import { addBookResultAction, updateBookResultAction, deleteBookResultAction, lo
 } from '../actions'
 import { reduxForm } from 'redux-form';
 import { routeActions } from 'react-router-redux'
-import DatePicker from './Datepicker.react'
-import Input from './Input.react'
-import Select from './Select.react'
+import DatePicker from './Datepicker'
+import Input from './Input'
+import Select from './Select'
 import { danger } from '../util/colors'
 
 const submit = (id, values, dispatch) => {

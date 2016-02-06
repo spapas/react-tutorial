@@ -9,6 +9,7 @@ import StatPanel from './StatPanel.react'
 class App extends React.Component {
 
     render() {
+        console.log("RENDERING APP");
         const { isLoading } = this.props.ui;
         return <div>
 

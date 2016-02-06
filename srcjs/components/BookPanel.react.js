@@ -9,18 +9,19 @@ import { Link } from 'react-router'
 
 class BookPanel extends React.Component {
     render() {
+        console.log("RENDERING BP");
         let { dispatch } = this.props;
         let { rows, count, page, sorting } = this.props.books;
-        
+
         const sort_method = key => () => {
             dispatch(toggleSortingAndLoadBooks(key))
         }
-        
+
         const cols = [
         {
-            key: 'id', 
-            label: 'ID', 
-            format: x=><Link to={`/book_update/${x.id}/`}>{x.id}</Link>, 
+            key: 'id',
+            label: 'ID',
+            format: x=><Link to={`/book_update/${x.id}/`}>{x.id}</Link>,
             sorting: sort_method('id')
         },
         {key: 'title', label: 'Title', sorting: sort_method('title')},
@@ -28,7 +29,7 @@ class BookPanel extends React.Component {
         {key: 'publish_date', label: 'Publish date', sorting: sort_method('publish_date')},
         {key: 'author_name', label: 'Author', sorting: sort_method('author__last_name')},
         ]
-        
+
         return <div>
             <BookSearchPanel />
             <div className="row">
@@ -51,7 +52,7 @@ class BookPanel extends React.Component {
 var mapStateToProps = function(state) {
     return {
         books:state.books,
-    } 
+    }
 };
 
 export default connect(mapStateToProps)(BookPanel);

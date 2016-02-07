@@ -5,14 +5,17 @@ import { loadBooks, changePage, toggleSortingAndLoadBooks } from '../actions'
 import PagingPanel from './PagingPanel'
 import BookSearchPanel from './BookSearchPanel'
 import { Link } from 'react-router'
-
+import { changeSearchAndLoadBooks } from '../actions'
 
 class BookPanel extends React.Component {
     render() {
-        console.log("RENDERING BP");
         let { dispatch } = this.props;
-        let { rows, count, page, sorting } = this.props.books;
+        let { rows, count, page, sorting, search } = this.props.books;
 
+        const onSearchChanged = (query) => {
+            dispatch(changeSearchAndLoadBooks(query))
+        }
+        
         const sort_method = key => () => {
             dispatch(toggleSortingAndLoadBooks(key))
         }
@@ -31,7 +34,7 @@ class BookPanel extends React.Component {
         ]
 
         return <div>
-            <BookSearchPanel />
+            <BookSearchPanel search={search} onSearchChanged={onSearchChanged} />
             <div className="row">
                 <div className="twelve columns">
                     <h3>Book list <Link className='button button-primary' style={{fontSize:'1em'}} to="/book_create/">+</Link></h3>

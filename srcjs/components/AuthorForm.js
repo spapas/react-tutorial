@@ -13,7 +13,6 @@ const submit = (id, values, dispatch) => {
     let url = '//127.0.0.1:8000/api/authors/'
     let type = 'POST'
     
-    
     if(id) {
         url = `//127.0.0.1:8000/api/authors/${id}/`
         type = 'PUT'
@@ -39,7 +38,7 @@ const submit = (id, values, dispatch) => {
 
         },
         error: (d) => {
-            //dispatch(submittingChangedAction(false))
+            dispatch(submittingChangedAction(false))
             console.log(d);
             dispatch(showErrorNotification(`Error (${d.status} - ${d.statusText}) while saving: ${d.responseText}` ))
         }

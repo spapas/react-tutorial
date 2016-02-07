@@ -1,9 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { connect } from 'react-redux'
-import { changeSearchAndLoadBooks } from '../actions'
 
-class SearchPanel extends React.Component {
+
+export default class SearchPanel extends React.Component {
     constructor() {
         super()
         this.onSearchChange = this.onSearchChange.bind(this)
@@ -13,14 +12,13 @@ class SearchPanel extends React.Component {
     }
     
     render() {
-        
-        
+
         return (
             <div className="row">
                 <div className="one-fourth column">
                     Filter: &nbsp;
-                    <input ref='search' name='search' type='text' defaultValue={this.props.books.search} value={this.state.search} onChange={this.onSearchChange } />
-                    {this.state.search?<button onClick={this.onClearSearch} >x</button>:''}
+                    <input ref='search' name='search' type='text' defaultValue={this.props.search} value={this.state.search} onChange={this.onSearchChange } />
+                    {(this.state.search||this.props.search)?<button onClick={this.onClearSearch} >x</button>:''}
                 </div>
             </div>
         )
@@ -36,7 +34,7 @@ class SearchPanel extends React.Component {
         });
         this.promise = setTimeout(function () {
             
-            this.props.dispatch(changeSearchAndLoadBooks(query) )
+            this.props.onSearchChanged(query) 
             
         }.bind(this), 400);
     }
@@ -45,15 +43,10 @@ class SearchPanel extends React.Component {
         this.setState({
             search: ''
         });
-        this.props.dispatch(changeSearchAndLoadBooks(undefined) )
+        this.props.onSearchChanged(undefined) 
         
     }
 }
 
-var mapStateToProps = function(state) {
-    return {
-        books:state.books,
-    } 
-};
 
-export default connect(mapStateToProps)(SearchPanel);
+

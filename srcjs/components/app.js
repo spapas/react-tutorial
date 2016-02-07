@@ -5,11 +5,11 @@ import { loadBooks, loadAuthors } from '../actions'
 import NotificationContainer from './notification';
 import LoadingContainer from './loading';
 import StatPanel from './StatPanel'
+import { bindActionCreators } from 'redux'
 
 class App extends React.Component {
 
     render() {
-        console.log("RENDERING APP");
         const { isLoading } = this.props.ui;
         return <div>
 
@@ -28,11 +28,13 @@ class App extends React.Component {
     }
 
     componentDidMount() {
+        let { loadBooks, loadAuthors } = this.props;
+        
         if(this.props.books.rows.length==0) {
-            this.props.dispatch(loadBooks());
+            loadBooks();
         }
         if(this.props.authors.rows.length==0) {
-            this.props.dispatch(loadAuthors());
+            loadAuthors();
         }
     }
 }
@@ -45,4 +47,8 @@ var mapStateToProps = function(state) {
     }
 };
 
-export default connect(mapStateToProps)(App);
+var mapDispatchToProps = function(dispatch) {
+    return bindActionCreators({ loadBooks, loadAuthors }, dispatch)
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);

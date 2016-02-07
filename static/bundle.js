@@ -27808,7 +27808,7 @@ var submit = function submit(id, values, dispatch) {
             }, 500);
         },
         error: function error(d) {
-            //dispatch(submittingChangedAction(false))
+            dispatch((0, _actions.submittingChangedAction)(false));
             console.log(d);
             dispatch((0, _actions.showErrorNotification)('Error (' + d.status + ' - ' + d.statusText + ') while saving: ' + d.responseText));
         }
@@ -27990,7 +27990,6 @@ var AuthorPanel = function (_React$Component) {
     _createClass(AuthorPanel, [{
         key: 'render',
         value: function render() {
-            console.log("RENDERING AP");
             var _props$authors = this.props.authors;
             var rows = _props$authors.rows;
             var count = _props$authors.count;
@@ -28080,11 +28079,14 @@ var submit = function submit(id, values, dispatch) {
         type = 'PUT';
     }
 
+    dispatch((0, _actions.submittingChangedAction)(true));
+
     $.ajax({
         type: type,
         url: url,
         data: values,
         success: function success(d) {
+            dispatch((0, _actions.submittingChangedAction)(false));
             dispatch((0, _actions.showSuccessNotification)('Success!'));
             if (id) {
                 dispatch((0, _actions.updateBookResultAction)(d));
@@ -28094,7 +28096,7 @@ var submit = function submit(id, values, dispatch) {
             dispatch(_reactRouterRedux.routeActions.push('/'));
         },
         error: function error(d) {
-            //dispatch(submittingChangedAction(false))
+            dispatch((0, _actions.submittingChangedAction)(false));
             console.log(d);
             dispatch((0, _actions.showErrorNotification)('Error (' + d.status + ' - ' + d.statusText + ') while saving: ' + d.responseText));
         }
@@ -28335,13 +28337,17 @@ var BookPanel = function (_React$Component) {
     _createClass(BookPanel, [{
         key: 'render',
         value: function render() {
-            console.log("RENDERING BP");
             var dispatch = this.props.dispatch;
             var _props$books = this.props.books;
             var rows = _props$books.rows;
             var count = _props$books.count;
             var page = _props$books.page;
             var sorting = _props$books.sorting;
+            var search = _props$books.search;
+
+            var onSearchChanged = function onSearchChanged(query) {
+                dispatch((0, _actions.changeSearchAndLoadBooks)(query));
+            };
 
             var sort_method = function sort_method(key) {
                 return function () {
@@ -28365,7 +28371,7 @@ var BookPanel = function (_React$Component) {
             return _react2.default.createElement(
                 'div',
                 null,
-                _react2.default.createElement(_BookSearchPanel2.default, null),
+                _react2.default.createElement(_BookSearchPanel2.default, { search: search, onSearchChanged: onSearchChanged }),
                 _react2.default.createElement(
                     'div',
                     { className: 'row' },
@@ -28424,10 +28430,6 @@ var _reactDom = require('react-dom');
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _reactRedux = require('react-redux');
-
-var _actions = require('../actions');
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -28462,8 +28464,8 @@ var SearchPanel = function (_React$Component) {
                     'div',
                     { className: 'one-fourth column' },
                     'Filter:  ',
-                    _react2.default.createElement('input', { ref: 'search', name: 'search', type: 'text', defaultValue: this.props.books.search, value: this.state.search, onChange: this.onSearchChange }),
-                    this.state.search ? _react2.default.createElement(
+                    _react2.default.createElement('input', { ref: 'search', name: 'search', type: 'text', defaultValue: this.props.search, value: this.state.search, onChange: this.onSearchChange }),
+                    this.state.search || this.props.search ? _react2.default.createElement(
                         'button',
                         { onClick: this.onClearSearch },
                         'x'
@@ -28483,7 +28485,7 @@ var SearchPanel = function (_React$Component) {
             });
             this.promise = setTimeout(function () {
 
-                this.props.dispatch((0, _actions.changeSearchAndLoadBooks)(query));
+                this.props.onSearchChanged(query);
             }.bind(this), 400);
         }
     }, {
@@ -28492,22 +28494,16 @@ var SearchPanel = function (_React$Component) {
             this.setState({
                 search: ''
             });
-            this.props.dispatch((0, _actions.changeSearchAndLoadBooks)(undefined));
+            this.props.onSearchChanged(undefined);
         }
     }]);
 
     return SearchPanel;
 }(_react2.default.Component);
 
-var mapStateToProps = function mapStateToProps(state) {
-    return {
-        books: state.books
-    };
-};
+exports.default = SearchPanel;
 
-exports.default = (0, _reactRedux.connect)(mapStateToProps)(SearchPanel);
-
-},{"../actions":277,"react":220,"react-dom":25,"react-redux":31}],283:[function(require,module,exports){
+},{"react":220,"react-dom":25}],283:[function(require,module,exports){
 'use strict';
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -28694,7 +28690,7 @@ exports.default = function (_ref) {
         null,
         _react2.default.createElement(
             'label',
-            { forHtml: 'field.name' },
+            { forHtml: field.name },
             label
         ),
         _react2.default.createElement(
@@ -28844,6 +28840,8 @@ var _StatPanel = require('./StatPanel');
 
 var _StatPanel2 = _interopRequireDefault(_StatPanel);
 
+var _redux = require('redux');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -28864,7 +28862,6 @@ var App = function (_React$Component) {
     _createClass(App, [{
         key: 'render',
         value: function render() {
-            console.log("RENDERING APP");
             var isLoading = this.props.ui.isLoading;
 
             return _react2.default.createElement(
@@ -28890,11 +28887,15 @@ var App = function (_React$Component) {
     }, {
         key: 'componentDidMount',
         value: function componentDidMount() {
+            var _props = this.props;
+            var loadBooks = _props.loadBooks;
+            var loadAuthors = _props.loadAuthors;
+
             if (this.props.books.rows.length == 0) {
-                this.props.dispatch((0, _actions.loadBooks)());
+                loadBooks();
             }
             if (this.props.authors.rows.length == 0) {
-                this.props.dispatch((0, _actions.loadAuthors)());
+                loadAuthors();
             }
         }
     }]);
@@ -28910,9 +28911,13 @@ var mapStateToProps = function mapStateToProps(state) {
     };
 };
 
-exports.default = (0, _reactRedux.connect)(mapStateToProps)(App);
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+    return (0, _redux.bindActionCreators)({ loadBooks: _actions.loadBooks, loadAuthors: _actions.loadAuthors }, dispatch);
+};
 
-},{"../actions":277,"./StatPanel":287,"./loading":290,"./notification":291,"react":220,"react-redux":31,"react-router":58}],290:[function(require,module,exports){
+exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(App);
+
+},{"../actions":277,"./StatPanel":287,"./loading":290,"./notification":291,"react":220,"react-redux":31,"react-router":58,"redux":274}],290:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

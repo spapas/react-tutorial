@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { addBookResultAction, updateBookResultAction, deleteBookResultAction, loadBookAction, showSuccessNotification, 
-    showErrorNotification, loadCategories, loadSubCategories
+    showErrorNotification, loadCategories, loadSubCategories, submittingChangedAction
 } from '../actions'
 import { reduxForm } from 'redux-form';
 import { routeActions } from 'react-router-redux'
@@ -19,11 +19,14 @@ const submit = (id, values, dispatch) => {
         type = 'PUT'
     }
     
+    dispatch(submittingChangedAction(true))
+    
     $.ajax({
         type,
         url,
         data: values,
         success: (d) => {
+            dispatch(submittingChangedAction(false))
             dispatch(showSuccessNotification('Success!'))
             if(id) {
                 dispatch(updateBookResultAction(d))
@@ -34,7 +37,7 @@ const submit = (id, values, dispatch) => {
 
         },
         error: (d) => {
-            //dispatch(submittingChangedAction(false))
+            dispatch(submittingChangedAction(false))
             console.log(d);
             dispatch(showErrorNotification(`Error (${d.status} - ${d.statusText}) while saving: ${d.responseText}` ))
         }

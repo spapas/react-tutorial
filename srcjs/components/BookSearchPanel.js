@@ -7,12 +7,10 @@ export default class SearchPanel extends React.Component {
         super()
         this.onSearchChange = this.onSearchChange.bind(this)
         this.onClearSearch = this.onClearSearch.bind(this)
-        
         this.state = {}
     }
     
     render() {
-
         return (
             <div className="row">
                 <div className="one-fourth column">

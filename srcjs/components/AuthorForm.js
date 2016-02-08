@@ -134,7 +134,7 @@ const mapStateToProps = (state, props) => {
     
     return {
         author:state.authors.author,
-        ui:state.ui,
+		ui: state.ui,
         initialValues:initial,
     }
 };

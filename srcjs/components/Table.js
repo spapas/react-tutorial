@@ -1,14 +1,17 @@
 import React from 'react';
 
+const formatHeader = ({key, label}, sorting) => (sorting==key)?('+'+label):(
+	(sorting=='-'+key)?('-'+label):label
+)
+
+
 export default (props) => {
     let headers = props.cols.map(col => <th key={col.key}>
         {col.sorting?<a href='#' onClick={e => {
             e.preventDefault();
             col.sorting()
-        }}>
-            {(props.sorting==col.key)?('+'+col.label):(
-                (props.sorting=='-'+col.key)?('-'+col.label):col.label
-            )}
+        }}>	
+            {formatHeader(col, props.sorting)}
         </a>:col.label
         }
     </th>)
@@ -20,18 +23,16 @@ export default (props) => {
         }
     </tr>)
         
-    return (
-        <table>
-            <thead>
-                <tr>
-                    {headers}
-                </tr>
-            </thead>
-            <tbody>
-                {rows}
-            </tbody>
-        </table>
-    );
+    return <table>
+		<thead>
+			<tr>
+				{headers}
+			</tr>
+		</thead>
+		<tbody>
+			{rows}
+		</tbody>
+	</table>
 }
 
 

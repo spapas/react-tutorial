@@ -154,11 +154,11 @@ const mapStateToProps = (state, props) => {
     }
 
     return {
-        book:state.books.book,
-        categories:state.categories,
-        authors:state.authors,
-        ui:state.ui,
-        initialValues:initial,
+        book: state.books.book,
+        categories: state.categories,
+        authors: state.authors,
+		ui: state.ui,
+        initialValues: initial,
     }
 };
 

@@ -39,16 +39,16 @@ class App extends React.Component {
     }
 }
 
-var mapStateToProps = function(state) {
-    return {
-        books:state.books,
-        authors:state.authors,
-        ui:state.ui,
-    }
-};
+const mapStateToProps = state => ({
+	books:state.books,
+	authors:state.authors,
+	ui:state.ui,
+})
 
-var mapDispatchToProps = function(dispatch) {
-    return bindActionCreators({ loadBooks, loadAuthors }, dispatch)
-}
+
+const mapDispatchToProps = dispatch => bindActionCreators({ 
+	loadBooks, loadAuthors 
+}, dispatch)
+
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

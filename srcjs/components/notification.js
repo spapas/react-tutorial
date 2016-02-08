@@ -49,18 +49,14 @@ const NotificationContainer = (props) => {
 }
 
 
-let mapStateToProps = (state, ownProps) => {
-    return {
-        notification: state.notification
-    }
-};
+let mapStateToProps = state => ({
+	notification: state.notification
+})
 
-let mapDispatchToProps = (dispatch, ownProps) => {
-    return {
-        onHide: () => {
-            dispatch(hideNotification())
-        }
+let mapDispatchToProps = dispatch => ({
+	onHide: () => {
+		dispatch(hideNotification())
     }
-}
+})	
 
 export default connect(mapStateToProps, mapDispatchToProps)(NotificationContainer);

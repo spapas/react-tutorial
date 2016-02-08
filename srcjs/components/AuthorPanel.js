@@ -23,10 +23,8 @@ class AuthorPanel extends React.Component {
     }
 }
 
-var mapStateToProps = function(state) {
-    return {
-        authors:state.authors,
-    }
-};
+const mapStateToProps = (state) => ({
+	authors:state.authors,
+})
 
 export default connect(mapStateToProps)(AuthorPanel);

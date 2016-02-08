@@ -1,23 +1,22 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import Table from './Table'
-import { loadBooks, changePage, toggleSortingAndLoadBooks } from '../actions'
+import { loadBooks, changePage, toggleSortingAndLoadBooks, changeSearchAndLoadBooks } from '../actions'
 import PagingPanel from './PagingPanel'
 import BookSearchPanel from './BookSearchPanel'
 import { Link } from 'react-router'
-import { changeSearchAndLoadBooks } from '../actions'
+import { bindActionCreators } from 'redux'
 
 class BookPanel extends React.Component {
     render() {
-        let { dispatch } = this.props;
         let { rows, count, page, sorting, search } = this.props.books;
-
+	    let { loadBooks, changePage, toggleSortingAndLoadBooks, changeSearchAndLoadBooks  } = this.props;
         const onSearchChanged = (query) => {
-            dispatch(changeSearchAndLoadBooks(query))
+            changeSearchAndLoadBooks(query)
         }
         
         const sort_method = key => () => {
-            dispatch(toggleSortingAndLoadBooks(key))
+            toggleSortingAndLoadBooks(key)
         }
 
         const cols = [
@@ -42,20 +41,22 @@ class BookPanel extends React.Component {
                 </div>
             </div>
             <PagingPanel count={count} page={page} onNextPage={() => {
-                dispatch(changePage(page+1));
-                dispatch(loadBooks())
+                changePage(page+1);
+                loadBooks()
             }} onPreviousPage={ () => {
-                dispatch(changePage(page-1));
-                dispatch(loadBooks())
+                changePage(page-1);
+                loadBooks()
             }} />
         </div>
     }
 }
 
-var mapStateToProps = function(state) {
-    return {
-        books:state.books,
-    }
-};
+const mapStateToProps = state => ({
+	books:state.books,
+})
 
-export default connect(mapStateToProps)(BookPanel);
+const mapDispatchToProps = dispatch => bindActionCreators({ 
+	loadBooks, changePage, toggleSortingAndLoadBooks, changeSearchAndLoadBooks 
+}, dispatch)
+
+export default connect(mapStateToProps, mapDispatchToProps)(BookPanel);

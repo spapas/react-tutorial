@@ -26,8 +26,10 @@ To get the code for a tag, just clone the repository and do a:
 
 ``python manage.py syncdb``
 
+``npm install``
+
 If you want to go to a different tag, you'll just do again a checkout to
-the corresponding tag, but you'll need to delete the ``db.sqlite3`` file (that
+the corresponding tag and do an ``npm install``, but you'll need to delete the ``db.sqlite3`` file (that
 contains the database schema for the application) and then do a syncdb again because
 there may be differences in the database between different tags.
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import Notification from 'react-notification';
+import { Notification } from 'react-notification';
 import { connect } from 'react-redux'
 import { hideNotification } from '../actions'
 
@@ -22,7 +22,7 @@ const NotificationContainer = (props) => {
             color = colors.info
             break;
     }
-
+    
     return <Notification
         isActive={isActive}
         message={message?message:''}

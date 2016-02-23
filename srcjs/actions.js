@@ -191,11 +191,9 @@ export function loadBookAction(id) {
         let url = `//127.0.0.1:8000/api/books/${id}/?format=json`;
         dispatch(loadingChangedAction(true));
         $.get(url, function(data) {
-            setTimeout(() => {
-                dispatch(showBookResultAction(data));
-                dispatch(loadingChangedAction(false));
-                dispatch(loadSubCategories(data.category));
-            }, 1000);
+            dispatch(showBookResultAction(data));
+            dispatch(loadingChangedAction(false));
+            dispatch(loadSubCategories(data.category));
         });
     }
 }
@@ -219,10 +217,8 @@ export function loadAuthorAction(id) {
         let url = `//127.0.0.1:8000/api/authors/${id}/?format=json`;
         dispatch(loadingChangedAction(true));
         $.get(url, function(data) {
-            setTimeout(() => {
-                dispatch(showAuthorResultAction(data));
-                dispatch(loadingChangedAction(false));
-            }, 1000);
+            dispatch(showAuthorResultAction(data));
+            dispatch(loadingChangedAction(false));
         });
     }
 }

@@ -136,6 +136,13 @@ export function hideNotification() {
     }
 }
 
+export function changeSearch(search) {
+    return {
+        type: 'CHANGE_SEARCH',
+        search
+    }
+}
+
 export function changeSearchAndLoadBooks(search) {
     return (dispatch, getState) => {
         dispatch(changeSearch(search))
@@ -153,14 +160,6 @@ export function toggleSortingAndLoadBooks(sorting) {
             search: formatUrl(getState().books)
         } )
         dispatch(loadBooks())
-    }
-}
-
-
-export function changeSearch(search) {
-    return {
-        type: 'CHANGE_SEARCH',
-        search
     }
 }
 

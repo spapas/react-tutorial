@@ -27888,9 +27888,9 @@ exports.changePage = changePage;
 exports.showSuccessNotification = showSuccessNotification;
 exports.showErrorNotification = showErrorNotification;
 exports.hideNotification = hideNotification;
+exports.changeSearch = changeSearch;
 exports.changeSearchAndLoadBooks = changeSearchAndLoadBooks;
 exports.toggleSortingAndLoadBooks = toggleSortingAndLoadBooks;
-exports.changeSearch = changeSearch;
 exports.loadBooks = loadBooks;
 exports.loadBookAction = loadBookAction;
 exports.loadAuthors = loadAuthors;
@@ -28036,6 +28036,13 @@ function hideNotification() {
     };
 }
 
+function changeSearch(search) {
+    return {
+        type: 'CHANGE_SEARCH',
+        search: search
+    };
+}
+
 function changeSearchAndLoadBooks(search) {
     return function (dispatch, getState) {
         dispatch(changeSearch(search));
@@ -28053,13 +28060,6 @@ function toggleSortingAndLoadBooks(sorting) {
             search: (0, _formatters.formatUrl)(getState().books)
         });
         dispatch(loadBooks());
-    };
-}
-
-function changeSearch(search) {
-    return {
-        type: 'CHANGE_SEARCH',
-        search: search
     };
 }
 

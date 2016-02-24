@@ -22,17 +22,11 @@ const getCols = sort_method => [
 
 class BookPanel extends React.Component {
     render() {
-        let { rows, count, page, sorting, search } = this.props.books;
-	    let { loadBooks, changePage, toggleSortingAndLoadBooks, changeSearchAndLoadBooks  } = this.props;
+        const { rows, count, page, sorting, search } = this.props.books;
+	    const { loadBooks, changePage, toggleSortingAndLoadBooks, changeSearchAndLoadBooks  } = this.props;
         
-        const onSearchChanged = query => {
-            changeSearchAndLoadBooks(query)
-        }
-        
-        const sort_method = key => () => {
-            toggleSortingAndLoadBooks(key)
-        }
-
+        const onSearchChanged = query => changeSearchAndLoadBooks(query)
+        const sort_method = key => () => toggleSortingAndLoadBooks(key)
         const cols = getCols(sort_method)
 
         return <div>

@@ -28736,6 +28736,21 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var getCols = function getCols(sort_method) {
+    return [{
+        key: 'id',
+        label: 'ID',
+        format: function format(x) {
+            return _react2.default.createElement(
+                _reactRouter.Link,
+                { to: '/book_update/' + x.id + '/' },
+                x.id
+            );
+        },
+        sorting: sort_method('id')
+    }, { key: 'title', label: 'Title', sorting: sort_method('title') }, { key: 'category_name', label: 'Category', sorting: sort_method('subcategory__name') }, { key: 'publish_date', label: 'Publish date', sorting: sort_method('publish_date') }, { key: 'author_name', label: 'Author', sorting: sort_method('author__last_name') }];
+};
+
 var BookPanel = function (_React$Component) {
     _inherits(BookPanel, _React$Component);
 
@@ -28760,6 +28775,7 @@ var BookPanel = function (_React$Component) {
             var toggleSortingAndLoadBooks = _props.toggleSortingAndLoadBooks;
             var changeSearchAndLoadBooks = _props.changeSearchAndLoadBooks;
 
+
             var onSearchChanged = function onSearchChanged(query) {
                 changeSearchAndLoadBooks(query);
             };
@@ -28770,18 +28786,7 @@ var BookPanel = function (_React$Component) {
                 };
             };
 
-            var cols = [{
-                key: 'id',
-                label: 'ID',
-                format: function format(x) {
-                    return _react2.default.createElement(
-                        _reactRouter.Link,
-                        { to: '/book_update/' + x.id + '/' },
-                        x.id
-                    );
-                },
-                sorting: sort_method('id')
-            }, { key: 'title', label: 'Title', sorting: sort_method('title') }, { key: 'category_name', label: 'Category', sorting: sort_method('subcategory__name') }, { key: 'publish_date', label: 'Publish date', sorting: sort_method('publish_date') }, { key: 'author_name', label: 'Author', sorting: sort_method('author__last_name') }];
+            var cols = getCols(sort_method);
 
             return _react2.default.createElement(
                 'div',

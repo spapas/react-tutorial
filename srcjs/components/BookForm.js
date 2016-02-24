@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { addBookResultAction, updateBookResultAction, deleteBookResultAction, loadBookAction, showSuccessNotification, 
-    showErrorNotification, loadCategories, loadSubCategories, submittingChangedAction
+import { addBookResult, updateBookResult, deleteBookResult, loadBook, showSuccessNotification, 
+    showErrorNotification, loadCategories, loadSubCategories, submittingChanged
 } from '../actions'
 import { reduxForm } from 'redux-form';
 import { routeActions } from 'react-router-redux'
@@ -19,25 +19,25 @@ const submit = (id, values, dispatch) => {
         type = 'PUT'
     }
     
-    dispatch(submittingChangedAction(true))
+    dispatch(submittingChanged(true))
     
     $.ajax({
         type,
         url,
         data: values,
         success: (d) => {
-            dispatch(submittingChangedAction(false))
+            dispatch(submittingChanged(false))
             dispatch(showSuccessNotification('Success!'))
             if(id) {
-                dispatch(updateBookResultAction(d))
+                dispatch(updateBookResult(d))
             } else {
-                dispatch(addBookResultAction(d))
+                dispatch(addBookResult(d))
             }
             dispatch(routeActions.push('/'));
 
         },
         error: (d) => {
-            dispatch(submittingChangedAction(false))
+            dispatch(submittingChanged(false))
             console.log(d);
             dispatch(showErrorNotification(`Error (${d.status} - ${d.statusText}) while saving: ${d.responseText}` ))
         }
@@ -53,7 +53,7 @@ const del = (id, dispatch) => {
         success: (d) => {
             
             dispatch(showSuccessNotification('Success!'))
-            dispatch(deleteBookResultAction(id))
+            dispatch(deleteBookResult(id))
             dispatch(routeActions.push('/'));
 
         },
@@ -136,7 +136,7 @@ class BookForm extends React.Component {
         
         if (this.props.params.id) {
             if(!this.props.book || this.props.book.id != this.props.params.id) {
-                this.props.dispatch(loadBookAction(this.props.params.id));
+                this.props.dispatch(loadBook(this.props.params.id));
             }
         } else {
             // New book 

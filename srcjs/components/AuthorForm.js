@@ -1,8 +1,8 @@
 import React from 'react'
 
 import { 
-    addAuthorResultAction, updateAuthorResultAction, loadAuthorAction, deleteAuthorResultAction, showSuccessNotification, showErrorNotification,
-    submittingChangedAction,
+    addAuthorResult, updateAuthorResult, loadAuthor, deleteAuthorResult, showSuccessNotification, showErrorNotification,
+    submittingChanged,
 } from '../actions'
 import { reduxForm } from 'redux-form';
 import { routeActions } from 'react-router-redux'
@@ -18,7 +18,7 @@ const submit = (id, values, dispatch) => {
         type = 'PUT'
     }
     
-    dispatch(submittingChangedAction(true))
+    dispatch(submittingChanged(true))
     
     $.ajax({
         type,
@@ -28,17 +28,17 @@ const submit = (id, values, dispatch) => {
             setTimeout( () => {
                 dispatch(showSuccessNotification('Success!'))
                 if(id) {
-                    dispatch(updateAuthorResultAction(d))
+                    dispatch(updateAuthorResult(d))
                 } else {
-                    dispatch(addAuthorResultAction(d))
+                    dispatch(addAuthorResult(d))
                 }
-                dispatch(submittingChangedAction(false))
+                dispatch(submittingChanged(false))
                 dispatch(routeActions.push('/authors/'));
             }, 500);
 
         },
         error: (d) => {
-            dispatch(submittingChangedAction(false))
+            dispatch(submittingChanged(false))
             console.log(d);
             dispatch(showErrorNotification(`Error (${d.status} - ${d.statusText}) while saving: ${d.responseText}` ))
         }
@@ -49,15 +49,15 @@ const submit = (id, values, dispatch) => {
 const del = (id, dispatch) => {
     const url = `//127.0.0.1:8000/api/authors/${id}/`
     const type='DELETE';
-    dispatch(submittingChangedAction(true))
+    dispatch(submittingChanged(true))
     $.ajax({
         type,
         url,
         success: (d) => {
             setTimeout( () => {
                 dispatch(showSuccessNotification('Success!'))
-                dispatch(deleteAuthorResultAction(id))
-                dispatch(submittingChangedAction(false))
+                dispatch(deleteAuthorResult(id))
+                dispatch(submittingChanged(false))
                 dispatch(routeActions.push('/authors/'));
             }, 500);
         },
@@ -115,7 +115,7 @@ class AuthorForm extends React.Component {
     componentDidMount() {
         if (this.props.params.id) {
             if(!this.props.author || this.props.author.id != this.props.params.id) {
-                this.props.dispatch(loadAuthorAction(this.props.params.id));
+                this.props.dispatch(loadAuthor(this.props.params.id));
             }
         } else {
             // New author 

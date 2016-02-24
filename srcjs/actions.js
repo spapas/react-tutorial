@@ -1,14 +1,14 @@
 import { history } from  './store'
 import { formatUrl } from './util/formatters'
 
-export function showBooksResultAction(jsonResult) {
+export function showBooksResult(jsonResult) {
     return {
         type: "SHOW_BOOKS",
         books: jsonResult
     };
 }
 
-export function showBookResultAction(jsonResult) {
+export function showBookResult(jsonResult) {
     return {
         type: "SHOW_BOOK",
         book: jsonResult
@@ -16,84 +16,84 @@ export function showBookResultAction(jsonResult) {
 }
 
 
-export function addBookResultAction(book) {
+export function addBookResult(book) {
     return {
         type: "ADD_BOOK",
         book
     };
 }
 
-export function updateBookResultAction(book) {
+export function updateBookResult(book) {
     return {
         type: "UPDATE_BOOK",
         book
     };
 }
 
-export function deleteBookResultAction(id) {
+export function deleteBookResult(id) {
     return {
         type: "DELETE_BOOK",
         id
     };
 }
 
-export function showAuthorsResultAction(jsonResult) {
+export function showAuthorsResult(jsonResult) {
     return {
         type: "SHOW_AUTHORS",
         authors: jsonResult
     };
 }
 
-export function showAuthorResultAction(author) {
+export function showAuthorResult(author) {
     return {
         type: "SHOW_AUTHOR",
         author
     };
 }
 
-export function addAuthorResultAction(author) {
+export function addAuthorResult(author) {
     return {
         type: "ADD_AUTHOR",
         author
     };
 }
 
-export function updateAuthorResultAction(author) {
+export function updateAuthorResult(author) {
     return {
         type: "UPDATE_AUTHOR",
         author
     };
 }
 
-export function deleteAuthorResultAction(id) {
+export function deleteAuthorResult(id) {
     return {
         type: "DELETE_AUTHOR",
         id
     };
 }
 
-export function showCategoriesResultAction(jsonResult) {
+export function showCategoriesResult(jsonResult) {
     return {
         type: "SHOW_CATEGORIES",
         categories: jsonResult
     };
 }
 
-export function showSubCategoriesResultAction(jsonResult) {
+export function showSubCategoriesResult(jsonResult) {
     return {
         type: "SHOW_SUBCATEGORIES",
         subcategories: jsonResult
     };
 }
 
-export function loadingChangedAction(isLoading) {
+export function loadingChanged(isLoading) {
     return {
         type: "IS_LOADING",
         isLoading
     }
 }
 
-export function submittingChangedAction(isSubmitting) {
+export function submittingChanged(isSubmitting) {
     return {
         type: "IS_SUBMITTING",
         isSubmitting
@@ -175,24 +175,24 @@ export function loadBooks(page=1) {
         if(search) {
             url+=`&search=${search}`
         }
-        dispatch(loadingChangedAction(true));
+        dispatch(loadingChanged(true));
         $.get(url, data => {
             setTimeout(() => {
-                dispatch(showBooksResultAction(data));
-                dispatch(loadingChangedAction(false));
+                dispatch(showBooksResult(data));
+                dispatch(loadingChanged(false));
             }, 1000);
         });
     }
 }
 
 
-export function loadBookAction(id) {
+export function loadBook(id) {
     return (dispatch, getState) => {
         let url = `//127.0.0.1:8000/api/books/${id}/?format=json`;
-        dispatch(loadingChangedAction(true));
+        dispatch(loadingChanged(true));
         $.get(url, function(data) {
-            dispatch(showBookResultAction(data));
-            dispatch(loadingChangedAction(false));
+            dispatch(showBookResult(data));
+            dispatch(loadingChanged(false));
             dispatch(loadSubCategories(data.category));
         });
     }
@@ -201,24 +201,24 @@ export function loadBookAction(id) {
 export function loadAuthors(page=1) {
     return (dispatch, getState) => {
         let url = `//127.0.0.1:8000/api/authors/?format=json&page=${page}`;
-        dispatch(loadingChangedAction(true));
+        dispatch(loadingChanged(true));
         $.get(url, data => {
             setTimeout(() => {
-                dispatch(showAuthorsResultAction(data));
-                dispatch(loadingChangedAction(false));
+                dispatch(showAuthorsResult(data));
+                dispatch(loadingChanged(false));
             }, 1000);
         });
     }
 }
 
 
-export function loadAuthorAction(id) {
+export function loadAuthor(id) {
     return (dispatch, getState) => {
         let url = `//127.0.0.1:8000/api/authors/${id}/?format=json`;
-        dispatch(loadingChangedAction(true));
+        dispatch(loadingChanged(true));
         $.get(url, function(data) {
-            dispatch(showAuthorResultAction(data));
-            dispatch(loadingChangedAction(false));
+            dispatch(showAuthorResult(data));
+            dispatch(loadingChanged(false));
         });
     }
 }
@@ -228,7 +228,7 @@ export function loadCategories() {
         let url = '//127.0.0.1:8000/api/categories/?format=json';
 
         $.get(url, data => {
-            dispatch(showCategoriesResultAction(data));
+            dispatch(showCategoriesResult(data));
         });
     }
 }
@@ -237,13 +237,13 @@ export function loadSubCategories(category) {
     return (dispatch, getState) => {
         
         if(!category) {
-            dispatch(showSubCategoriesResultAction([]));
+            dispatch(showSubCategoriesResult([]));
             return 
         }
         let url = `//127.0.0.1:8000/api/subcategories/?format=json&category=${category}`;
 
         $.get(url, data => {
-            dispatch(showSubCategoriesResultAction(data));
+            dispatch(showSubCategoriesResult(data));
         });
     }
 }

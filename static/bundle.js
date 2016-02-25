@@ -29041,13 +29041,13 @@ exports.default = function (_ref) {
 };
 
 },{"../util/colors":303,"react":225}],293:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+    value: true
 });
 
-var _react = require('react');
+var _react = require("react");
 
 var _react2 = _interopRequireDefault(_react);
 
@@ -29056,43 +29056,83 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 exports.default = function (_ref) {
-	var _ref$page = _ref.page;
-	var page = _ref$page === undefined ? 1 : _ref$page;
-	var _ref$page_size = _ref.page_size;
-	var page_size = _ref$page_size === undefined ? 5 : _ref$page_size;
-	var count = _ref.count;
-	var onNextPage = _ref.onNextPage;
-	var onPreviousPage = _ref.onPreviousPage;
+    var _ref$page = _ref.page;
+    var page = _ref$page === undefined ? 1 : _ref$page;
+    var _ref$page_size = _ref.page_size;
+    var page_size = _ref$page_size === undefined ? 5 : _ref$page_size;
+    var count = _ref.count;
+    var onNextPage = _ref.onNextPage;
+    var onPreviousPage = _ref.onPreviousPage;
 
-	var props = _objectWithoutProperties(_ref, ['page', 'page_size', 'count', 'onNextPage', 'onPreviousPage']);
+    var props = _objectWithoutProperties(_ref, ["page", "page_size", "count", "onNextPage", "onPreviousPage"]);
 
-	var total_pages = Math.ceil(count / page_size);
+    var total_pages = Math.ceil(count / page_size);
 
-	return _react2.default.createElement(
-		'div',
-		{ className: 'row' },
-		page == 1 ? '' : _react2.default.createElement(
-			'button',
-			{ onClick: function onClick(e) {
-					e.preventDefault();
-					onPreviousPage();
-				} },
-			'<'
-		),
-		'  Page ',
-		page,
-		' of ',
-		total_pages,
-		'  ',
-		page == total_pages ? '' : _react2.default.createElement(
-			'button',
-			{ onClick: function onClick(e) {
-					e.preventDefault();
-					onNextPage();
-				} },
-			'>'
-		)
-	);
+    return _react2.default.createElement(
+        "div",
+        { className: "row" },
+        page == 1 ? null : _react2.default.createElement(
+            "button",
+            { onClick: function onClick(e) {
+                    e.preventDefault();
+                    onPreviousPage();
+                } },
+            "<"
+        ),
+        "  Page ",
+        page,
+        " of ",
+        total_pages,
+        "  ",
+        page == total_pages ? null : _react2.default.createElement(
+            "button",
+            { onClick: function onClick(e) {
+                    e.preventDefault();
+                    onNextPage();
+                } },
+            ">"
+        )
+    );
+};
+
+var FunctionalPagingPanel = function FunctionalPagingPanel(_ref2) {
+    var _ref2$page = _ref2.page;
+    var page = _ref2$page === undefined ? 1 : _ref2$page;
+    var _ref2$page_size = _ref2.page_size;
+    var page_size = _ref2$page_size === undefined ? 5 : _ref2$page_size;
+    var count = _ref2.count;
+    var onNextPage = _ref2.onNextPage;
+    var onPreviousPage = _ref2.onPreviousPage;
+
+    var props = _objectWithoutProperties(_ref2, ["page", "page_size", "count", "onNextPage", "onPreviousPage"]);
+
+    return function (total_pages) {
+        return _react2.default.createElement(
+            "div",
+            { className: "row" },
+            page == 1 ? null : _react2.default.createElement(
+                "button",
+                { onClick: function onClick(e) {
+                        e.preventDefault();
+                        onPreviousPage();
+                    } },
+                "<"
+            ),
+            "  Page ",
+            page,
+            " of ",
+            total_pages,
+            "  ",
+            page == total_pages ? null : _react2.default.createElement(
+                "button",
+                { onClick: function onClick(e) {
+                        e.preventDefault();
+                        onNextPage();
+                    } },
+                ">"
+            )
+        );
+    }(Math.ceil(count / page_size));
 };
 
 },{"react":225}],294:[function(require,module,exports){

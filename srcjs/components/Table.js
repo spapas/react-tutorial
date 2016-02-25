@@ -4,9 +4,8 @@ const formatHeader = ({key, label}, sorting) => (sorting==key)?('+'+label):(
 	(sorting=='-'+key)?('-'+label):label
 )
 
-
 export default (props) => {
-    let headers = props.cols.map(col => <th key={col.key}>
+    const headers = props.cols.map(col => <th key={col.key}>
         {col.sorting?<a href='#' onClick={e => {
             e.preventDefault();
             col.sorting()
@@ -15,7 +14,7 @@ export default (props) => {
         </a>:col.label
         }
     </th>)
-    let rows = props.rows.map(row => <tr key={row.id}>
+    const rows = props.rows.map(row => <tr key={row.id}>
         {
             props.cols.map(col => <td key={col.key}>
                 {(col.format?col.format(row):row[col.key])}

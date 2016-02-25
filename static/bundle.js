@@ -28370,8 +28370,6 @@ exports.default = AuthorFormContainer;
 },{"../actions":285,"../util/colors":303,"./Input":292,"react":225,"react-router-redux":43,"redux-form":249}],287:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
@@ -28390,12 +28388,6 @@ var _Table2 = _interopRequireDefault(_Table);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
 var cols = [{ key: 'id', label: 'id', format: function format(x) {
         return _react2.default.createElement(
             _reactRouter.Link,
@@ -28404,46 +28396,27 @@ var cols = [{ key: 'id', label: 'id', format: function format(x) {
         );
     } }, { key: 'last_name', label: 'Last name' }, { key: 'first_name', label: 'First name' }];
 
-var AuthorPanel = function (_React$Component) {
-    _inherits(AuthorPanel, _React$Component);
-
-    function AuthorPanel() {
-        _classCallCheck(this, AuthorPanel);
-
-        return _possibleConstructorReturn(this, Object.getPrototypeOf(AuthorPanel).apply(this, arguments));
-    }
-
-    _createClass(AuthorPanel, [{
-        key: 'render',
-        value: function render() {
-            var _props$authors = this.props.authors;
-            var rows = _props$authors.rows;
-            var count = _props$authors.count;
-
-            return _react2.default.createElement(
-                'div',
-                { className: 'row' },
+var AuthorPanel = function AuthorPanel(props) {
+    return _react2.default.createElement(
+        'div',
+        { className: 'row' },
+        _react2.default.createElement(
+            'div',
+            { className: 'twelve columns' },
+            _react2.default.createElement(
+                'h3',
+                null,
+                'Author list ',
                 _react2.default.createElement(
-                    'div',
-                    { className: 'twelve columns' },
-                    _react2.default.createElement(
-                        'h3',
-                        null,
-                        'Author list ',
-                        _react2.default.createElement(
-                            _reactRouter.Link,
-                            { className: 'button button-primary', style: { fontSize: '1em' }, to: '/author_create/' },
-                            '+'
-                        )
-                    ),
-                    _react2.default.createElement(_Table2.default, { cols: cols, rows: rows })
+                    _reactRouter.Link,
+                    { className: 'button button-primary', style: { fontSize: '1em' }, to: '/author_create/' },
+                    '+'
                 )
-            );
-        }
-    }]);
-
-    return AuthorPanel;
-}(_react2.default.Component);
+            ),
+            _react2.default.createElement(_Table2.default, { cols: cols, rows: props.authors.rows })
+        )
+    );
+};
 
 var mapStateToProps = function mapStateToProps(state) {
     return {
@@ -28704,18 +28677,14 @@ var mapStateToProps = function mapStateToProps(state, props) {
     };
 };
 
-var BookFormContainer = (0, _reduxForm.reduxForm)({
+exports.default = (0, _reduxForm.reduxForm)({
     form: 'bookForm',
     fields: ['title', 'category', 'subcategory', 'publish_date', 'author'],
     validate: validate
 }, mapStateToProps)(BookForm);
 
-exports.default = BookFormContainer;
-
 },{"../actions":285,"../util/colors":303,"./DatePicker":291,"./Input":292,"./Select":294,"react":225,"react-router-redux":43,"redux-form":249}],289:[function(require,module,exports){
 'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -28747,12 +28716,6 @@ var _redux = require('redux');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
 var getCols = function getCols(sort_method) {
     return [{
         key: 'id',
@@ -28768,76 +28731,60 @@ var getCols = function getCols(sort_method) {
     }, { key: 'title', label: 'Title', sorting: sort_method('title') }, { key: 'category_name', label: 'Category', sorting: sort_method('subcategory__name') }, { key: 'publish_date', label: 'Publish date', sorting: sort_method('publish_date') }, { key: 'author_name', label: 'Author', sorting: sort_method('author__last_name') }];
 };
 
-var BookPanel = function (_React$Component) {
-    _inherits(BookPanel, _React$Component);
+var BookPanel = function BookPanel(props) {
+    var _props$books = props.books;
+    var rows = _props$books.rows;
+    var count = _props$books.count;
+    var page = _props$books.page;
+    var sorting = _props$books.sorting;
+    var search = _props$books.search;
+    var loadBooks = props.loadBooks;
+    var changePage = props.changePage;
+    var toggleSortingAndLoadBooks = props.toggleSortingAndLoadBooks;
+    var changeSearchAndLoadBooks = props.changeSearchAndLoadBooks;
 
-    function BookPanel() {
-        _classCallCheck(this, BookPanel);
+    var onSearchChanged = function onSearchChanged(query) {
+        return changeSearchAndLoadBooks(query);
+    };
+    var sort_method = function sort_method(key) {
+        return function () {
+            return toggleSortingAndLoadBooks(key);
+        };
+    };
+    var cols = getCols(sort_method);
 
-        return _possibleConstructorReturn(this, Object.getPrototypeOf(BookPanel).apply(this, arguments));
-    }
-
-    _createClass(BookPanel, [{
-        key: 'render',
-        value: function render() {
-            var _props$books = this.props.books;
-            var rows = _props$books.rows;
-            var count = _props$books.count;
-            var page = _props$books.page;
-            var sorting = _props$books.sorting;
-            var search = _props$books.search;
-            var _props = this.props;
-            var loadBooks = _props.loadBooks;
-            var changePage = _props.changePage;
-            var toggleSortingAndLoadBooks = _props.toggleSortingAndLoadBooks;
-            var changeSearchAndLoadBooks = _props.changeSearchAndLoadBooks;
-
-            var onSearchChanged = function onSearchChanged(query) {
-                return changeSearchAndLoadBooks(query);
-            };
-            var sort_method = function sort_method(key) {
-                return function () {
-                    return toggleSortingAndLoadBooks(key);
-                };
-            };
-            var cols = getCols(sort_method);
-
-            return _react2.default.createElement(
+    return _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(_BookSearchPanel2.default, { search: search, onSearchChanged: onSearchChanged }),
+        _react2.default.createElement(
+            'div',
+            { className: 'row' },
+            _react2.default.createElement(
                 'div',
-                null,
-                _react2.default.createElement(_BookSearchPanel2.default, { search: search, onSearchChanged: onSearchChanged }),
+                { className: 'twelve columns' },
                 _react2.default.createElement(
-                    'div',
-                    { className: 'row' },
+                    'h3',
+                    null,
+                    'Book list ',
                     _react2.default.createElement(
-                        'div',
-                        { className: 'twelve columns' },
-                        _react2.default.createElement(
-                            'h3',
-                            null,
-                            'Book list ',
-                            _react2.default.createElement(
-                                _reactRouter.Link,
-                                { className: 'button button-primary', style: { fontSize: '1em' }, to: '/book_create/' },
-                                '+'
-                            )
-                        ),
-                        _react2.default.createElement(_Table2.default, { sorting: sorting, cols: cols, rows: rows })
+                        _reactRouter.Link,
+                        { className: 'button button-primary', style: { fontSize: '1em' }, to: '/book_create/' },
+                        '+'
                     )
                 ),
-                _react2.default.createElement(_PagingPanel2.default, { count: count, page: page, onNextPage: function onNextPage() {
-                        changePage(page + 1);
-                        loadBooks();
-                    }, onPreviousPage: function onPreviousPage() {
-                        changePage(page - 1);
-                        loadBooks();
-                    } })
-            );
-        }
-    }]);
-
-    return BookPanel;
-}(_react2.default.Component);
+                _react2.default.createElement(_Table2.default, { sorting: sorting, cols: cols, rows: rows })
+            )
+        ),
+        _react2.default.createElement(_PagingPanel2.default, { count: count, page: page, onNextPage: function onNextPage() {
+                changePage(page + 1);
+                loadBooks();
+            }, onPreviousPage: function onPreviousPage() {
+                changePage(page - 1);
+                loadBooks();
+            } })
+    );
+};
 
 var mapStateToProps = function mapStateToProps(state) {
     return {

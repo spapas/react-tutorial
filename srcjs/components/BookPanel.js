@@ -20,33 +20,32 @@ const getCols = sort_method => [
     {key: 'author_name', label: 'Author', sorting: sort_method('author__last_name')},
 ]
 
-class BookPanel extends React.Component {
-    render() {
-        const { rows, count, page, sorting, search } = this.props.books;
-	    const { loadBooks, changePage, toggleSortingAndLoadBooks, changeSearchAndLoadBooks  } = this.props;
-        
-        const onSearchChanged = query => changeSearchAndLoadBooks(query)
-        const sort_method = key => () => toggleSortingAndLoadBooks(key)
-        const cols = getCols(sort_method)
+const BookPanel = (props) => {
+    const { rows, count, page, sorting, search } = props.books;
+    const { loadBooks, changePage, toggleSortingAndLoadBooks, changeSearchAndLoadBooks  } = props;
+    
+    const onSearchChanged = query => changeSearchAndLoadBooks(query)
+    const sort_method = key => () => toggleSortingAndLoadBooks(key)
+    const cols = getCols(sort_method)
 
-        return <div>
-            <BookSearchPanel search={search} onSearchChanged={onSearchChanged} />
-            <div className="row">
-                <div className="twelve columns">
-                    <h3>Book list <Link className='button button-primary' style={{fontSize:'1em'}} to="/book_create/">+</Link></h3>
-                    <Table sorting={sorting} cols={cols} rows={rows} />
-                </div>
+    return <div>
+        <BookSearchPanel search={search} onSearchChanged={onSearchChanged} />
+        <div className="row">
+            <div className="twelve columns">
+                <h3>Book list <Link className='button button-primary' style={{fontSize:'1em'}} to="/book_create/">+</Link></h3>
+                <Table sorting={sorting} cols={cols} rows={rows} />
             </div>
-            <PagingPanel count={count} page={page} onNextPage={() => {
-                changePage(page+1);
-                loadBooks()
-            }} onPreviousPage={ () => {
-                changePage(page-1);
-                loadBooks()
-            }} />
         </div>
-    }
+        <PagingPanel count={count} page={page} onNextPage={() => {
+            changePage(page+1);
+            loadBooks()
+        }} onPreviousPage={ () => {
+            changePage(page-1);
+            loadBooks()
+        }} />
+    </div>
 }
+
 
 const mapStateToProps = state => ({
 	books:state.books,

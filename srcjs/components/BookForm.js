@@ -162,11 +162,11 @@ const mapStateToProps = (state, props) => {
     }
 };
 
-const BookFormContainer = reduxForm({
+export default reduxForm({
     form: 'bookForm',
     fields: ['title', 'category', 'subcategory', 'publish_date', 'author' ],
     validate
 }, mapStateToProps)(BookForm);
 
 
-export default BookFormContainer;
+

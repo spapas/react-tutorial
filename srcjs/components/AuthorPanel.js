@@ -9,19 +9,12 @@ const cols = [
     {key: 'first_name', label: 'First name',},
 ]
 
-class AuthorPanel extends React.Component {
-    render() {
-        let { rows, count } = this.props.authors;
-        return(
-            <div className="row">
-                <div className="twelve columns">
-                    <h3>Author list <Link className='button button-primary' style={{fontSize:'1em'}} to="/author_create/">+</Link></h3>
-                    <Table cols={cols} rows={rows} />
-                </div>
-            </div>
-        );
-    }
-}
+const AuthorPanel = (props) => <div className="row">
+    <div className="twelve columns">
+        <h3>Author list <Link className='button button-primary' style={{fontSize:'1em'}} to="/author_create/">+</Link></h3>
+        <Table cols={cols} rows={props.authors.rows} />
+    </div>
+</div>
 
 const mapStateToProps = (state) => ({
 	authors:state.authors,

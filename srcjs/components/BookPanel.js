@@ -7,30 +7,27 @@ import BookSearchPanel from './BookSearchPanel'
 import { Link } from 'react-router'
 import { bindActionCreators } from 'redux'
 
+const getCols = sort_method => [
+    {
+        key: 'id',
+        label: 'ID',
+        format: x=><Link to={`/book_update/${x.id}/`}>{x.id}</Link>,
+        sorting: sort_method('id')
+    },
+    {key: 'title', label: 'Title', sorting: sort_method('title')},
+    {key: 'category_name', label: 'Category', sorting: sort_method('subcategory__name')},
+    {key: 'publish_date', label: 'Publish date', sorting: sort_method('publish_date')},
+    {key: 'author_name', label: 'Author', sorting: sort_method('author__last_name')},
+]
+
 class BookPanel extends React.Component {
     render() {
-        let { rows, count, page, sorting, search } = this.props.books;
-	    let { loadBooks, changePage, toggleSortingAndLoadBooks, changeSearchAndLoadBooks  } = this.props;
-        const onSearchChanged = (query) => {
-            changeSearchAndLoadBooks(query)
-        }
+        const { rows, count, page, sorting, search } = this.props.books;
+	    const { loadBooks, changePage, toggleSortingAndLoadBooks, changeSearchAndLoadBooks  } = this.props;
         
-        const sort_method = key => () => {
-            toggleSortingAndLoadBooks(key)
-        }
-
-        const cols = [
-        {
-            key: 'id',
-            label: 'ID',
-            format: x=><Link to={`/book_update/${x.id}/`}>{x.id}</Link>,
-            sorting: sort_method('id')
-        },
-        {key: 'title', label: 'Title', sorting: sort_method('title')},
-        {key: 'category_name', label: 'Category', sorting: sort_method('subcategory__name')},
-        {key: 'publish_date', label: 'Publish date', sorting: sort_method('publish_date')},
-        {key: 'author_name', label: 'Author', sorting: sort_method('author__last_name')},
-        ]
+        const onSearchChanged = query => changeSearchAndLoadBooks(query)
+        const sort_method = key => () => toggleSortingAndLoadBooks(key)
+        const cols = getCols(sort_method)
 
         return <div>
             <BookSearchPanel search={search} onSearchChanged={onSearchChanged} />

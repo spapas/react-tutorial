@@ -68,6 +68,12 @@ const validate = values => {
     if (!values.title) {
         errors.title = 'Required';
     }
+    if(values.publish_date) {
+        const re = /^\d{4}-\d{2}-\d{2}$/;  
+        if(!re.exec(values.publish_date)) {
+            errors.publish_date = 'Invalid';
+        }
+    }
     return errors;
 }
 
@@ -107,15 +113,12 @@ class BookForm extends React.Component {
             
             <div className='row'>
                 <div className='six columns'>
-                    <label forHtml='publish_date'>Publish Date</label>
-                    <DatePicker className="u-full-width" {...publish_date} />
+                    <DatePicker className="u-full-width" label='Publish Date' field={publish_date} />
                 </div>
                 <div className='six columns'>
-                    <label forHtml='author'>Author</label>
-                    <select type='text' className="u-full-width" {...author} >
-                        <option></option>
-                        {authors.map(a => <option value={a.id} key={a.id} >{a.last_name} {a.first_name}</option>)}
-                    </select>
+                    <Select label='author' field={author} options={
+                        authors.map(a => ({'id': a.id, 'name': `${a.first_name} ${a.last_name}`}))
+                    } />
                 </div>
             </div>
             

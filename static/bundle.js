@@ -28429,8 +28429,6 @@ exports.default = (0, _reactRedux.connect)(mapStateToProps)(AuthorPanel);
 },{"./Table":296,"react":225,"react-redux":34,"react-router":63}],288:[function(require,module,exports){
 'use strict';
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 Object.defineProperty(exports, "__esModule", {
@@ -28525,6 +28523,12 @@ var validate = function validate(values) {
     if (!values.title) {
         errors.title = 'Required';
     }
+    if (values.publish_date) {
+        var re = /^\d{4}-\d{2}-\d{2}$/;
+        if (!re.exec(values.publish_date)) {
+            errors.publish_date = 'Invalid';
+        }
+    }
     return errors;
 };
 
@@ -28595,35 +28599,14 @@ var BookForm = function (_React$Component) {
                     _react2.default.createElement(
                         'div',
                         { className: 'six columns' },
-                        _react2.default.createElement(
-                            'label',
-                            { forHtml: 'publish_date' },
-                            'Publish Date'
-                        ),
-                        _react2.default.createElement(_DatePicker2.default, _extends({ className: 'u-full-width' }, publish_date))
+                        _react2.default.createElement(_DatePicker2.default, { className: 'u-full-width', label: 'Publish Date', field: publish_date })
                     ),
                     _react2.default.createElement(
                         'div',
                         { className: 'six columns' },
-                        _react2.default.createElement(
-                            'label',
-                            { forHtml: 'author' },
-                            'Author'
-                        ),
-                        _react2.default.createElement(
-                            'select',
-                            _extends({ type: 'text', className: 'u-full-width' }, author),
-                            _react2.default.createElement('option', null),
-                            authors.map(function (a) {
-                                return _react2.default.createElement(
-                                    'option',
-                                    { value: a.id, key: a.id },
-                                    a.last_name,
-                                    ' ',
-                                    a.first_name
-                                );
-                            })
-                        )
+                        _react2.default.createElement(_Select2.default, { label: 'author', field: author, options: authors.map(function (a) {
+                                return { 'id': a.id, 'name': a.first_name + ' ' + a.last_name };
+                            }) })
                     )
                 ),
                 _react2.default.createElement(
@@ -28908,6 +28891,8 @@ var _reactDom = require('react-dom');
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
+var _colors = require('../util/colors');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -28928,13 +28913,31 @@ var DatePicker = function (_React$Component) {
     _createClass(DatePicker, [{
         key: 'render',
         value: function render() {
-            return _react2.default.createElement('input', _extends({ type: 'text', ref: 'date' }, this.props));
+            var _props = this.props;
+            var field = _props.field;
+            var label = _props.label;
+
+            return _react2.default.createElement(
+                'div',
+                null,
+                _react2.default.createElement(
+                    'label',
+                    { forHtml: field.name },
+                    label
+                ),
+                _react2.default.createElement('input', _extends({ type: 'text', ref: 'date', className: 'u-full-width' }, field)),
+                field.touched && field.error && _react2.default.createElement(
+                    'div',
+                    { style: { color: 'white', backgroundColor: _colors.danger } },
+                    field.error
+                )
+            );
         }
     }, {
         key: 'componentDidMount',
         value: function componentDidMount() {
-            $(_reactDom2.default.findDOMNode(this)).datepicker({ dateFormat: 'yy-mm-dd' });
-            $(_reactDom2.default.findDOMNode(this)).on('change', this.handleChange.bind(this));
+            $(_reactDom2.default.findDOMNode(this.refs.date)).datepicker({ dateFormat: 'yy-mm-dd' });
+            $(_reactDom2.default.findDOMNode(this.refs.date)).on('change', this.handleChange.bind(this));
         }
     }, {
         key: 'componentWillUnmount',
@@ -28944,7 +28947,7 @@ var DatePicker = function (_React$Component) {
         value: function handleChange(e) {
             e.preventDefault();
             var date = _reactDom2.default.findDOMNode(this.refs.date).value;
-            this.props.onChange(date);
+            this.props.field.onChange(date);
         }
     }]);
 
@@ -28953,7 +28956,7 @@ var DatePicker = function (_React$Component) {
 
 exports.default = DatePicker;
 
-},{"react":225,"react-dom":25}],292:[function(require,module,exports){
+},{"../util/colors":303,"react":225,"react-dom":25}],292:[function(require,module,exports){
 'use strict';
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };

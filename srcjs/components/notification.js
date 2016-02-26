@@ -23,8 +23,6 @@ const NotificationContainer = (props) => {
             break;
     }
     
-    
-    
     return <Notification
         isActive={isActive}
         message={message?message:''}

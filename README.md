@@ -8,7 +8,7 @@ to the following articles from http://spapas.github.io/:
 - http://spapas.github.io/2015/07/02/comprehensive-react-flux-tutorial-2/
 - http://spapas.github.io/2015/09/08/more-complex-react-flux-example/
 
-To be able to follow the articles, I've added a bunch of tags in the repository(they go from
+To be able to follow the articles, I've added a bunch of tags in the repository (they go from
 the simplest case to the most complex one):
 
 - react-only
@@ -42,14 +42,16 @@ Now, to actually run the application, you'll need to use
 
 to start the django development server (or run rs.bat/rs.sh depending on
 your shell). For the ``react-only`` version you
-can directly modify the js files and see the differences. However, for all
-other versions a node-js toolset is used to compile the javascript sources
-to a bundle that is actually used.
+can directly modify the js files and see the differences when you
+refresh the page in your browser. However, for all
+other versions a node-js toolset with browserify is used to compile
+the javascript sources to the bundle that is actually used.
 
 So, when developing I recommend running ``npm run watch`` to start watchify
 which automatically re-builds your javascript bundle when it detects a change. Another
 solution is to run ``npm run build`` that will create a (minified) bundle with
-the current sources (but will need to be re-run by hand when something changes).
+the current sources (but will need to be re-run by hand when something in your
+javascript changes).
 
 
 You can find more info about how I use this node-js toolset

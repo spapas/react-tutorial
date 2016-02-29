@@ -28604,7 +28604,7 @@ var BookForm = function (_React$Component) {
                     _react2.default.createElement(
                         'div',
                         { className: 'six columns' },
-                        _react2.default.createElement(_Select2.default, { label: 'author', field: author, options: authors.map(function (a) {
+                        _react2.default.createElement(_Select2.default, { label: 'Author', field: author, options: authors.map(function (a) {
                                 return { 'id': a.id, 'name': a.first_name + ' ' + a.last_name };
                             }) })
                     )

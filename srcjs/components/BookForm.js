@@ -92,7 +92,7 @@ class BookForm extends React.Component {
         const tsubmit = submit.bind(undefined,id);
         const dsubmit = del.bind(undefined,id, dispatch);
 
-        return <form   onSubmit={handleSubmit(tsubmit) }>
+        return <form onSubmit={handleSubmit(tsubmit)}>
             
             <div className='row'>
                 <div className='six columns'>
@@ -110,25 +110,22 @@ class BookForm extends React.Component {
                     <Select label='Subcategory' field={subcategory} options={subcategories} />
                 </div>
             </div>
-            
             <div className='row'>
                 <div className='six columns'>
                     <DatePicker className="u-full-width" label='Publish Date' field={publish_date} />
                 </div>
                 <div className='six columns'>
-                    <Select label='author' field={author} options={
+                    <Select label='Author' field={author} options={
                         authors.map(a => ({'id': a.id, 'name': `${a.first_name} ${a.last_name}`}))
                     } />
                 </div>
             </div>
-            
             <button disabled={isSubmitting} className='button button-primary' onClick={handleSubmit(tsubmit)}>
                 Save
             </button> 
             {id?<button disabled={isSubmitting} type='button' className='button button-primary' style={{backgroundColor: danger}} onClick={dsubmit}>
                 Delete
             </button>:null}
-
         </form>
     }
     

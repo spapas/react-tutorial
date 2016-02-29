@@ -25,17 +25,14 @@ const submit = (id, values, dispatch) => {
         url,
         data: values,
         success: (d) => {
-            setTimeout( () => {
-                dispatch(showSuccessNotification('Success!'))
-                if(id) {
-                    dispatch(updateAuthorResult(d))
-                } else {
-                    dispatch(addAuthorResult(d))
-                }
-                dispatch(submittingChanged(false))
-                dispatch(routeActions.push('/authors/'));
-            }, 500);
-
+            dispatch(showSuccessNotification('Success!'))
+            if(id) {
+                dispatch(updateAuthorResult(d))
+            } else {
+                dispatch(addAuthorResult(d))
+            }
+            dispatch(submittingChanged(false))
+            dispatch(routeActions.push('/authors/'));
         },
         error: (d) => {
             dispatch(submittingChanged(false))
@@ -54,14 +51,13 @@ const del = (id, dispatch) => {
         type,
         url,
         success: (d) => {
-            setTimeout( () => {
-                dispatch(showSuccessNotification('Success!'))
-                dispatch(deleteAuthorResult(id))
-                dispatch(submittingChanged(false))
-                dispatch(routeActions.push('/authors/'));
-            }, 500);
+            dispatch(showSuccessNotification('Success!'))
+            dispatch(deleteAuthorResult(id))
+            dispatch(submittingChanged(false))
+            dispatch(routeActions.push('/authors/'));
         },
         error: (d) => {
+            dispatch(submittingChanged(false))
             dispatch(showErrorNotification(`Error (${d.status} - ${d.statusText}) while saving: ${d.responseText}` ))
         }
     });

@@ -7,7 +7,7 @@ to the following articles from http://spapas.github.io/:
 - http://spapas.github.io/2015/06/05/comprehensive-react-flux-tutorial/
 - http://spapas.github.io/2015/07/02/comprehensive-react-flux-tutorial-2/
 - http://spapas.github.io/2015/09/08/more-complex-react-flux-example/
-- http://spapas.github.io/2015/09/08/more-complex-react-flux-example/
+- http://spapas.github.io/2016/03/02/react-redux-tutorial/
 
 To be able to follow the articles, I've added a bunch of tags in the repository (they go from
 the simplest case to the most complex one):

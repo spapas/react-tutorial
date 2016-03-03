@@ -12,12 +12,12 @@ to the following articles from http://spapas.github.io/:
 To be able to follow the articles, I've added a bunch of tags in the repository (they go from
 the simplest case to the most complex one):
 
-- react-only
-- react-only-validation
-- react-flux
-- react-flux-better-organization
-- react-flux-complex
-- react-redux
+- ``react-only``: Use react *only*
+- ``react-only-validation``: Add validation to the above bersion
+- ``react-flux``: Introduce flux to the react-only version
+- ``react-flux-better-organization``: Improve the code structure by adding modules etc
+- ``react-flux-complex``: A more complex app with react and flux
+- ``react-redux``: Use redux with react
 
 Get code for a tag
 ------------------

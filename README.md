@@ -13,7 +13,7 @@ To be able to follow the articles, I've added a bunch of tags in the repository 
 the simplest case to the most complex one):
 
 - ``react-only``: Use react *only*
-- ``react-only-validation``: Add validation to the above bersion
+- ``react-only-validation``: Add validation to the above version
 - ``react-flux``: Introduce flux to the react-only version
 - ``react-flux-better-organization``: Improve the code structure by adding modules etc
 - ``react-flux-complex``: A more complex app with react and flux

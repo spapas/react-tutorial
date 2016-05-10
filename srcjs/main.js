@@ -13,6 +13,10 @@ import AuthorPanel from './components/AuthorPanel';
 import BookForm from './components/BookForm';
 import AuthorForm from './components/AuthorForm';
 
+import schedule from './scheduler';
+
+
+
 const About = () => {
     return <div>
         <h2>About</h2>
@@ -48,4 +52,4 @@ render((
 )
 
 
-
+schedule();

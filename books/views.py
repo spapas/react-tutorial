@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from rest_framework import viewsets, filters
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 from books.models import Book, Category, SubCategory, Author
 from books.serializers import BookSerializer, CategorySerializer, SubCategorySerializer, AuthorSerializer
 
@@ -35,6 +37,12 @@ class AuthorViewSet(viewsets.ModelViewSet):
     search_fields = ('last_name', 'first_name', )
     ordering_fields = ('id', 'last_name', )
     ordering = ('last_name',)
+    
+    @list_route()
+    def get_author_number(self, request):
+        return Response(Author.objects.all().count())
+    
+    
 
 class SubCategoryViewSet(viewsets.ModelViewSet):
     queryset = SubCategory.objects.all()

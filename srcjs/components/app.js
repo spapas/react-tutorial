@@ -7,6 +7,7 @@ import LoadingContainer from './loading';
 import StatPanel from './StatPanel'
 import { bindActionCreators } from 'redux'
 
+
 class App extends React.Component {
 
     render() {

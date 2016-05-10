@@ -5,6 +5,7 @@ import { hideNotification } from '../actions'
 
 import * as colors from '../util/colors'
 
+
 const NotificationContainer = (props) => {
     let { message, notification_type } = props.notification;
     let { onHide } = props;

@@ -18,6 +18,7 @@ the simplest case to the most complex one):
 - ``react-flux-better-organization``: Improve the code structure by adding modules etc
 - ``react-flux-complex``: A more complex app with react and flux
 - ``react-redux``: Use redux with react
+- ``react-redux-poll-update``: Update UI automatically when there are changes to the data (uses polling)
 
 Get code for a tag
 ------------------

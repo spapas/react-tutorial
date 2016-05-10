@@ -27696,6 +27696,7 @@ function loadBooks() {
             url += '&search=' + search;
         }
         dispatch(loadingChangedAction(true));
+
         $.get(url, function (data) {
             setTimeout(function () {
                 dispatch(showBooksResultAction(data));

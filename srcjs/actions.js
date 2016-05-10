@@ -177,6 +177,8 @@ export function loadBooks(page=1) {
             url+=`&search=${search}`
         }
         dispatch(loadingChangedAction(true));
+        
+        
         $.get(url, data => {
             setTimeout(() => {
                 dispatch(showBooksResultAction(data));

@@ -1,45 +1,41 @@
 import React from 'react'
 
 import { 
-    addAuthorResultAction, updateAuthorResultAction, loadAuthorAction, deleteAuthorResultAction, showSuccessNotification, showErrorNotification,
-    submittingChangedAction,
+    addAuthorResult, updateAuthorResult, loadAuthor, deleteAuthorResult, showSuccessNotification, showErrorNotification,
+    submittingChanged,
 } from '../actions'
 import { reduxForm } from 'redux-form';
 import { routeActions } from 'react-router-redux'
-import Input from './Input.react'
+import Input from './Input'
 import { danger } from '../util/colors'
 
 const submit = (id, values, dispatch) => {
     let url = '//127.0.0.1:8000/api/authors/'
     let type = 'POST'
     
-    
     if(id) {
         url = `//127.0.0.1:8000/api/authors/${id}/`
         type = 'PUT'
     }
     
-    dispatch(submittingChangedAction(true))
+    dispatch(submittingChanged(true))
     
     $.ajax({
         type,
         url,
         data: values,
         success: (d) => {
-            setTimeout( () => {
-                dispatch(showSuccessNotification('Success!'))
-                if(id) {
-                    dispatch(updateAuthorResultAction(d))
-                } else {
-                    dispatch(addAuthorResultAction(d))
-                }
-                dispatch(submittingChangedAction(false))
-                dispatch(routeActions.push('/authors/'));
-            }, 500);
-
+            dispatch(showSuccessNotification('Success!'))
+            if(id) {
+                dispatch(updateAuthorResult(d))
+            } else {
+                dispatch(addAuthorResult(d))
+            }
+            dispatch(submittingChanged(false))
+            dispatch(routeActions.push('/authors/'));
         },
         error: (d) => {
-            //dispatch(submittingChangedAction(false))
+            dispatch(submittingChanged(false))
             console.log(d);
             dispatch(showErrorNotification(`Error (${d.status} - ${d.statusText}) while saving: ${d.responseText}` ))
         }
@@ -50,19 +46,18 @@ const submit = (id, values, dispatch) => {
 const del = (id, dispatch) => {
     const url = `//127.0.0.1:8000/api/authors/${id}/`
     const type='DELETE';
-    dispatch(submittingChangedAction(true))
+    dispatch(submittingChanged(true))
     $.ajax({
         type,
         url,
         success: (d) => {
-            setTimeout( () => {
-                dispatch(showSuccessNotification('Success!'))
-                dispatch(deleteAuthorResultAction(id))
-                dispatch(submittingChangedAction(false))
-                dispatch(routeActions.push('/authors/'));
-            }, 500);
+            dispatch(showSuccessNotification('Success!'))
+            dispatch(deleteAuthorResult(id))
+            dispatch(submittingChanged(false))
+            dispatch(routeActions.push('/authors/'));
         },
         error: (d) => {
+            dispatch(submittingChanged(false))
             dispatch(showErrorNotification(`Error (${d.status} - ${d.statusText}) while saving: ${d.responseText}` ))
         }
     });
@@ -116,7 +111,7 @@ class AuthorForm extends React.Component {
     componentDidMount() {
         if (this.props.params.id) {
             if(!this.props.author || this.props.author.id != this.props.params.id) {
-                this.props.dispatch(loadAuthorAction(this.props.params.id));
+                this.props.dispatch(loadAuthor(this.props.params.id));
             }
         } else {
             // New author 
@@ -135,7 +130,7 @@ const mapStateToProps = (state, props) => {
     
     return {
         author:state.authors.author,
-        ui:state.ui,
+		ui: state.ui,
         initialValues:initial,
     }
 };

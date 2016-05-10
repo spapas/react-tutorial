@@ -1,13 +1,13 @@
 import React from 'react'
 
-import { addBookResultAction, updateBookResultAction, deleteBookResultAction, loadBookAction, showSuccessNotification, 
-    showErrorNotification, loadCategories, loadSubCategories
+import { addBookResult, updateBookResult, deleteBookResult, loadBook, showSuccessNotification, 
+    showErrorNotification, loadCategories, loadSubCategories, submittingChanged
 } from '../actions'
 import { reduxForm } from 'redux-form';
 import { routeActions } from 'react-router-redux'
-import DatePicker from './Datepicker.react'
-import Input from './Input.react'
-import Select from './Select.react'
+import DatePicker from './DatePicker'
+import Input from './Input'
+import Select from './Select'
 import { danger } from '../util/colors'
 
 const submit = (id, values, dispatch) => {
@@ -19,22 +19,25 @@ const submit = (id, values, dispatch) => {
         type = 'PUT'
     }
     
+    dispatch(submittingChanged(true))
+    
     $.ajax({
         type,
         url,
         data: values,
         success: (d) => {
+            dispatch(submittingChanged(false))
             dispatch(showSuccessNotification('Success!'))
             if(id) {
-                dispatch(updateBookResultAction(d))
+                dispatch(updateBookResult(d))
             } else {
-                dispatch(addBookResultAction(d))
+                dispatch(addBookResult(d))
             }
             dispatch(routeActions.push('/'));
 
         },
         error: (d) => {
-            //dispatch(submittingChangedAction(false))
+            dispatch(submittingChanged(false))
             console.log(d);
             dispatch(showErrorNotification(`Error (${d.status} - ${d.statusText}) while saving: ${d.responseText}` ))
         }
@@ -50,7 +53,7 @@ const del = (id, dispatch) => {
         success: (d) => {
             
             dispatch(showSuccessNotification('Success!'))
-            dispatch(deleteBookResultAction(id))
+            dispatch(deleteBookResult(id))
             dispatch(routeActions.push('/'));
 
         },
@@ -64,6 +67,12 @@ const validate = values => {
     const errors = {};
     if (!values.title) {
         errors.title = 'Required';
+    }
+    if(values.publish_date) {
+        const re = /^\d{4}-\d{2}-\d{2}$/;  
+        if(!re.exec(values.publish_date)) {
+            errors.publish_date = 'Invalid';
+        }
     }
     return errors;
 }
@@ -83,7 +92,7 @@ class BookForm extends React.Component {
         const tsubmit = submit.bind(undefined,id);
         const dsubmit = del.bind(undefined,id, dispatch);
 
-        return <form   onSubmit={handleSubmit(tsubmit) }>
+        return <form onSubmit={handleSubmit(tsubmit)}>
             
             <div className='row'>
                 <div className='six columns'>
@@ -101,28 +110,22 @@ class BookForm extends React.Component {
                     <Select label='Subcategory' field={subcategory} options={subcategories} />
                 </div>
             </div>
-            
             <div className='row'>
                 <div className='six columns'>
-                    <label forHtml='publish_date'>Publish Date</label>
-                    <DatePicker className="u-full-width" {...publish_date} />
+                    <DatePicker className="u-full-width" label='Publish Date' field={publish_date} />
                 </div>
                 <div className='six columns'>
-                    <label forHtml='author'>Author</label>
-                    <select type='text' className="u-full-width" {...author} >
-                        <option></option>
-                        {authors.map(a => <option value={a.id} key={a.id} >{a.last_name} {a.first_name}</option>)}
-                    </select>
+                    <Select label='Author' field={author} options={
+                        authors.map(a => ({'id': a.id, 'name': `${a.first_name} ${a.last_name}`}))
+                    } />
                 </div>
             </div>
-            
             <button disabled={isSubmitting} className='button button-primary' onClick={handleSubmit(tsubmit)}>
                 Save
             </button> 
             {id?<button disabled={isSubmitting} type='button' className='button button-primary' style={{backgroundColor: danger}} onClick={dsubmit}>
                 Delete
             </button>:null}
-
         </form>
     }
     
@@ -133,7 +136,7 @@ class BookForm extends React.Component {
         
         if (this.props.params.id) {
             if(!this.props.book || this.props.book.id != this.props.params.id) {
-                this.props.dispatch(loadBookAction(this.props.params.id));
+                this.props.dispatch(loadBook(this.props.params.id));
             }
         } else {
             // New book 
@@ -151,19 +154,19 @@ const mapStateToProps = (state, props) => {
     }
 
     return {
-        book:state.books.book,
-        categories:state.categories,
-        authors:state.authors,
-        ui:state.ui,
-        initialValues:initial,
+        book: state.books.book,
+        categories: state.categories,
+        authors: state.authors,
+		ui: state.ui,
+        initialValues: initial,
     }
 };
 
-const BookFormContainer = reduxForm({
+export default reduxForm({
     form: 'bookForm',
     fields: ['title', 'category', 'subcategory', 'publish_date', 'author' ],
     validate
 }, mapStateToProps)(BookForm);
 
 
-export default BookFormContainer;
+

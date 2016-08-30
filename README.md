@@ -39,6 +39,10 @@ there may be differences in the database between different tags.
 Running the application
 -----------------------
 
+First, you must install required modules.
+
+``pip install -U -r requirements.txt`` 
+
 Now, to actually run the application, you'll need to use
 
 ``python manage.py runserver`` 

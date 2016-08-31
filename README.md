@@ -29,6 +29,10 @@ To get the code for a tag, just clone the repository and do a:
 
 ``python manage.py syncdb``
 
+If you use Django 1.7 or later.
+
+``python manage.py migrate``
+
 ``npm install``
 
 If you want to go to a different tag, you'll just do again a checkout to
